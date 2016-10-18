@@ -7,11 +7,8 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author: neilswainston
 '''
-from sklearn.cross_validation import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
 from tensorflow.contrib import framework, layers, learn
-import pandas
 import tensorflow
 
 
@@ -19,7 +16,7 @@ def logistic_regression(data):
     '''Perform logistic regression.'''
     log_res = LogisticRegression()
     log_res.fit(data[0], data[2])
-    print(accuracy_score(log_res.predict(data[1]), data[3]))
+    return log_res.predict(data[1])
 
 
 def linear_classifier(data, learning_rate=0.05, batch_size=128, steps=500):
@@ -30,7 +27,7 @@ def linear_classifier(data, learning_rate=0.05, batch_size=128, steps=500):
                                         feature_columns=feat_col,
                                         optimizer=optimizer)
 
-    _classify(data, classifier, batch_size, steps)
+    return _classify(data, classifier, batch_size, steps)
 
 
 def dnn_classifier(data, learning_rate=0.1, hidden_units=[10, 20, 10],
@@ -43,13 +40,13 @@ def dnn_classifier(data, learning_rate=0.1, hidden_units=[10, 20, 10],
                                      feature_columns=feat_col,
                                      optimizer=optimizer)
 
-    _classify(data, classifier, batch_size, steps)
+    return _classify(data, classifier, batch_size, steps)
 
 
 def dnn_tanh(data, batch_size=128, steps=100):
     '''Perform 3 layer neural network with hyperbolic tangent activation.'''
     classifier = learn.Estimator(model_fn=_dnn_tanh)
-    _classify(data, classifier, batch_size, steps)
+    return _classify(data, classifier, batch_size, steps)
 
 
 def _dnn_tanh(features, target):
@@ -77,23 +74,4 @@ def _get_classifier_params(data, learning_rate):
 def _classify(data, classifier, batch_size, steps):
     '''Perfoms classification.'''
     classifier.fit(data[0], data[2], batch_size=batch_size, steps=steps)
-    print(accuracy_score(classifier.predict(data[1]), data[3]))
-
-
-def _get_data(test_size=0.2):
-    '''Reads data and splits into training and test.'''
-    train = pandas.read_csv('../data/titanic_train.csv')
-    x, y = train[['Age', 'SibSp', 'Fare']].fillna(0), train['Survived']
-    return train_test_split(x, y, test_size=test_size)
-
-
-def main():
-    '''main method.'''
-    data = _get_data()
-    logistic_regression(data)
-    linear_classifier(data)
-    dnn_classifier(data)
-    dnn_tanh(data)
-
-if __name__ == '__main__':
-    main()
+    return classifier.predict(data[1])

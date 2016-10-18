@@ -1,10 +1,14 @@
-from sklearn import metrics, cross_validation
-from tensorflow.contrib import layers
-from tensorflow.contrib import learn
-from tensorflow.contrib.learn import models
-import pandas
+'''
+synbiochem (c) University of Manchester 2015
 
-import numpy as np
+synbiochem is licensed under the MIT License.
+
+To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
+
+@author: neilswainston
+'''
+from tensorflow.contrib import layers, learn
+from tensorflow.contrib.learn import models
 import tensorflow as tf
 
 
@@ -14,7 +18,7 @@ def classify(data, model_fn, steps=1000):
     return classifier.predict(data[1])
 
 
-def _get_categorical_model(n_classes):
+def get_categ_model(n_classes):
     def _categorical_model(features, target):
         '''Perform categorical model.'''
         target = tf.one_hot(target, 2, 1.0, 0.0)
@@ -33,7 +37,7 @@ def _get_categorical_model(n_classes):
     return _categorical_model
 
 
-def _get_one_hot_categorical_model(n_classes):
+def get_one_hot_categ_model(n_classes):
     def _one_hot_categorical_model(features, target):
         '''Perform one hot model.'''
         target = tf.one_hot(target, 2, 1.0, 0.0)
@@ -48,35 +52,3 @@ def _get_one_hot_categorical_model(n_classes):
         return tf.argmax(prediction, dimension=1), loss, train_op
 
     return _one_hot_categorical_model
-
-
-def _get_data():
-    '''Gets data.'''
-    data = pandas.read_csv('../data/titanic_train.csv')
-    x = data[['Embarked']]
-    y = data['Survived']
-    x_train, x_test, y_train, y_test = cross_validation.train_test_split(
-        x, y, test_size=0.2)
-
-    cat_processor = learn.preprocessing.CategoricalProcessor()
-    x_train = np.array(list(cat_processor.fit_transform(x_train)))
-    x_test = np.array(list(cat_processor.transform(x_test)))
-
-    return x_train, x_test, y_train, y_test
-
-
-def main():
-    '''main method.'''
-    data = _get_data()
-    n_classes = len(set([val for vals in data[0] for val in vals]))
-
-    predict = classify(data, _get_categorical_model(n_classes))
-    print 'Accuracy: {0}'.format(metrics.accuracy_score(predict, data[3]))
-    print 'ROC: {0}'.format(metrics.roc_auc_score(predict, data[3]))
-
-    predict = classify(data, _get_one_hot_categorical_model(n_classes))
-    print 'Accuracy: {0}'.format(metrics.accuracy_score(predict, data[3]))
-    print 'ROC: {0}'.format(metrics.roc_auc_score(predict, data[3]))
-
-if __name__ == '__main__':
-    main()
