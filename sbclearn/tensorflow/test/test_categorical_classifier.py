@@ -7,6 +7,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author: neilswainston
 '''
+import os
 import unittest
 
 from sklearn import cross_validation
@@ -14,7 +15,7 @@ from sklearn.metrics import accuracy_score
 from tensorflow.contrib import learn
 import pandas
 
-from sbclearn import categorical_classifier
+from sbclearn.tensorflow import categorical_classifier
 import numpy as np
 
 
@@ -37,7 +38,8 @@ class Test(unittest.TestCase):
 
 def _get_data():
     '''Gets data.'''
-    data = pandas.read_csv('titanic_train.csv')
+    directory = os.path.dirname(os.path.realpath(__file__))
+    data = pandas.read_csv(os.path.join(directory, 'titanic_train.csv'))
     x = data[['Embarked']]
     y = data['Survived']
     x_train, x_test, y_train, y_test = cross_validation.train_test_split(

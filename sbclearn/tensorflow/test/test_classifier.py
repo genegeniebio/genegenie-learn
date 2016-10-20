@@ -7,13 +7,14 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author: neilswainston
 '''
+import os
 import unittest
 
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import accuracy_score
 import pandas
 
-from sbclearn import classifier
+from sbclearn.tensorflow import classifier
 
 
 class Test(unittest.TestCase):
@@ -45,7 +46,8 @@ class Test(unittest.TestCase):
 
 def _get_data(test_size=0.2):
     '''Reads data and splits into training and test.'''
-    train = pandas.read_csv('titanic_train.csv')
+    directory = os.path.dirname(os.path.realpath(__file__))
+    train = pandas.read_csv(os.path.join(directory, 'titanic_train.csv'))
     x, y = train[['Age', 'SibSp', 'Fare']].fillna(0), train['Survived']
     return train_test_split(x, y, test_size=test_size)
 
