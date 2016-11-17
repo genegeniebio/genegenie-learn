@@ -10,15 +10,17 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import os
 import unittest
 
-from sbclearn.tensorflow import categorical_classifier
 from sklearn import cross_validation
 from sklearn.metrics import accuracy_score
 from tensorflow.contrib import learn
-import numpy as np
 import pandas
+
+from sbclearn.tensorflow import categorical_classifier
+import numpy as np
 
 
 class Test(unittest.TestCase):
+    '''Test class for testing categorical_classifier.'''
 
     def test_categorical_model(self):
         '''Tests categorical_model method.'''
@@ -39,10 +41,10 @@ def _get_data():
     '''Gets data.'''
     directory = os.path.dirname(os.path.realpath(__file__))
     data = pandas.read_csv(os.path.join(directory, 'titanic_train.csv'))
-    x = data[['Embarked']]
-    y = data['Survived']
+    x_vals = data[['Embarked']]
+    y_vals = data['Survived']
     x_train, x_test, y_train, y_test = cross_validation.train_test_split(
-        x, y, test_size=0.2)
+        x_vals, y_vals, test_size=0.2)
 
     cat_processor = learn.preprocessing.CategoricalProcessor()
     x_train = np.array(list(cat_processor.fit_transform(x_train)))

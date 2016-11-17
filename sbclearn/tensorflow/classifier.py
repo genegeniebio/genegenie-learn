@@ -30,8 +30,8 @@ def linear_classifier(data, learning_rate=0.05, batch_size=128, steps=500):
     return _classify(data, classifier, batch_size, steps)
 
 
-def dnn_classifier(data, learning_rate=0.1, hidden_units=[10, 20, 10],
-                   batch_size=128, steps=500):
+def dnn_classifier(data, hidden_units, learning_rate=0.1, batch_size=128,
+                   steps=500):
     '''Perform 3 layer neural network with rectified linear activation.'''
     classes, feat_col, optimizer = _get_classifier_params(data, learning_rate)
 

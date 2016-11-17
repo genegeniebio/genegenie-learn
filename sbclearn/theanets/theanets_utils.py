@@ -17,9 +17,8 @@ from functools import partial
 from itertools import count
 import random
 
-import numpy
-
 from sklearn.metrics import classification_report, confusion_matrix, f1_score
+import numpy
 import theanets
 
 
