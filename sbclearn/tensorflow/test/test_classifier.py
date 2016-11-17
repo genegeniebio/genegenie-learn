@@ -10,11 +10,10 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import os
 import unittest
 
+from sbclearn.tensorflow import classifier
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import accuracy_score
 import pandas
-
-from sbclearn.tensorflow import classifier
 
 
 class Test(unittest.TestCase):

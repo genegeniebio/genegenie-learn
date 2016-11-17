@@ -10,13 +10,12 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import os
 import unittest
 
+from sbclearn.tensorflow import categorical_classifier
 from sklearn import cross_validation
 from sklearn.metrics import accuracy_score
 from tensorflow.contrib import learn
-import pandas
-
-from sbclearn.tensorflow import categorical_classifier
 import numpy as np
+import pandas
 
 
 class Test(unittest.TestCase):

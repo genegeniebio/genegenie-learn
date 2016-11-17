@@ -12,10 +12,10 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import random
 import unittest
 
-from sklearn import datasets
-from sklearn.datasets.samples_generator import make_blobs
 import numpy
 
+from sklearn import datasets
+from sklearn.datasets.samples_generator import make_blobs
 import sbclearn.theanets.theanets_utils as theanets_utils
 
 
