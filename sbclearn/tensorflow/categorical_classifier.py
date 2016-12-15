@@ -13,12 +13,14 @@ import tensorflow as tf
 
 
 def classify(data, model_fn, steps=1000):
+    '''Perform classification.'''
     classifier = learn.Estimator(model_fn=model_fn)
     classifier.fit(data[0], data[2], steps=steps)
     return classifier.predict(data[1])
 
 
 def get_categ_model(n_classes):
+    '''Gets categorical model.'''
     def _categorical_model(features, target):
         '''Perform categorical model.'''
         target = tf.one_hot(target, 2, 1.0, 0.0)
@@ -38,6 +40,7 @@ def get_categ_model(n_classes):
 
 
 def get_one_hot_categ_model(n_classes):
+    '''Gets one hot categorical model.'''
     def _one_hot_categorical_model(features, target):
         '''Perform one hot model.'''
         target = tf.one_hot(target, 2, 1.0, 0.0)
