@@ -91,11 +91,10 @@ class Regressor(TheanetsBase):
         return self._exp.network.predict(_pad(x_test))
 
 
-def randomise_order(x_data, y_data):
-    '''Assumes x_data and y_data are paired (such that x_data[i] is paired with
-    y_data[i]) and then randomises their orders such that this pairing is
-    maintained.'''
-    data = zip(x_data, y_data)
+def randomise_order(data):
+    '''Assumes data are ordered by index and then randomises their orders such
+    that this order is maintained.'''
+    data = zip(*data)
     random.shuffle(data)
     return zip(*data)
 
