@@ -12,10 +12,10 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import random
 import unittest
 
-import numpy
-
 from sklearn import datasets
 from sklearn.datasets.samples_generator import make_blobs
+import numpy
+
 import sbclearn.theanets.theanets_utils as theanets_utils
 
 
@@ -26,7 +26,7 @@ class Test(unittest.TestCase):
         '''Tests the randomise_order method.'''
         list_a = [int(random.random() * 1000) for _ in range(0, 1024)]
         list_b = [v for v in list_a]
-        list_a, list_b = theanets_utils.randomise_order(list_a, list_b)
+        list_a, list_b = theanets_utils.randomise_order([list_a, list_b])
 
         for i, val in enumerate(list_a):
             self.assertEqual(val, list_b[i])
@@ -53,7 +53,7 @@ class TestClassifier(unittest.TestCase):
                                       'learning_rate': 5e-4})
 
         y_test = y_data[ind:]
-        y_pred, _, _, _, _ = classifier.classify(x_data[ind:], y_test)
+        y_pred, _, _, _, _ = classifier.predict(x_data[ind:], y_test)
         self.assertTrue(sum([i == j for i, j in zip(y_test, y_pred)]) /
                         float(len(y_test)) > 0.9)
 
@@ -70,7 +70,7 @@ class TestRegressor(unittest.TestCase):
         x_data = dataset.data.tolist()
         y_data = dataset.target.tolist()
 
-        x_data, y_data = theanets_utils.randomise_order(x_data, y_data)
+        x_data, y_data = theanets_utils.randomise_order([x_data, y_data])
 
         # Split data into training and classifying:
         ind = int(0.8 * len(x_data))
@@ -78,8 +78,7 @@ class TestRegressor(unittest.TestCase):
         y_train = [[y] for y in y_data[:ind]]
         regressor = theanets_utils.Regressor(x_data[:ind], y_train)
 
-        regressor.train(hidden_layers=[1])
-        y_pred = regressor.predict(x_data[ind:])
+        regressor.train(hidden_layers=[50, 50, 50])
+        _, error = regressor.predict(x_data[ind:], y_data[ind:])
 
-        self.assertTrue(numpy.sqrt(numpy.mean((y_data[ind:] - y_pred) ** 2)) <
-                        200)
+        self.assertTrue(error < 10000)

@@ -64,7 +64,7 @@ class Classifier(TheanetsBase):
         super(Classifier, self).__init__(theanets.Classifier, (x_data, y_data),
                                          len(self.__y_map))
 
-    def classify(self, x_test, y_test):
+    def predict(self, x_test, y_test):
         '''Classifies and analyses test data.'''
         y_pred = self._exp.network.classify(_pad(x_test))
 
@@ -86,9 +86,39 @@ class Regressor(TheanetsBase):
         super(Regressor, self).__init__(theanets.Regressor, (x_data, y_data),
                                         len(y_data[0]))
 
-    def predict(self, x_test):
+    def predict(self, x_test, y_test=None, results=None):
         '''Classifies and analyses test data.'''
-        return self._exp.network.predict(_pad(x_test))
+        preds = [val[0] for val in self._exp.network.predict(x_test)]
+
+        if y_test is None:
+            return preds, None
+        else:
+            if results is None:
+                results = defaultdict(list)
+
+            for tup in zip(*[y_test, preds]):
+                results[tup[0]].append(tup[1])
+
+            # The mean squared error:
+            error = \
+                numpy.mean([(x - y) ** 2
+                            for x, y in zip(results.keys(),
+                                            [numpy.mean(pred)
+                                             for pred in results.values()])])
+
+            return results, error
+
+
+def split_data(data, split=0.9):
+    '''Split data.'''
+    x_data_rand, y_data_rand = randomise_order(data)
+
+    # Split data into training and classifying:
+    ind = int(split * len(x_data_rand))
+
+    return x_data_rand[:ind], \
+        [[y] for y in y_data_rand[:ind]], \
+        x_data_rand[ind:], y_data_rand[ind:]
 
 
 def randomise_order(data):
