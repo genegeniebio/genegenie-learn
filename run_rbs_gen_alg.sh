@@ -1,1 +1,1 @@
-python sbclearn/rbs/rbs_gen_alg.py rbs.txt 0.9 10 50 0.25 0.15 0.1
+python sbclearn/rbs/rbs_gen_alg.py sbclearn/rbs/rbs.txt 0.9 10 50 0.5 0.2 0.1
