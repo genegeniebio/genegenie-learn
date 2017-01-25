@@ -7,6 +7,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author: neilswainston
 '''
+# pylint: disable=protected-access
 from sklearn.linear_model import LogisticRegression
 from tensorflow.contrib import framework, layers, learn
 import tensorflow

@@ -14,7 +14,6 @@ import unittest
 
 from sklearn import datasets
 from sklearn.datasets.samples_generator import make_blobs
-import numpy
 
 import sbclearn.theanets.theanets_utils as theanets_utils
 
