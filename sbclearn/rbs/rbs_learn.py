@@ -7,6 +7,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+from collections import defaultdict
 import numpy
 
 from sbclearn.theanets.theanets_utils import Regressor
@@ -86,10 +87,30 @@ def _plot(results):
 def main():
     '''main method.'''
     data, _ = get_data('rbs.txt')
-    x_train, y_train, x_test, y_test = sbclearn.split_data(data, 0.9)
-    regressor = Regressor(x_train, y_train)
-    regressor.train(hidden_layers=[10, 10, 10])
-    results, error = regressor.predict(x_test, y_test)
+
+    hyperparams = {
+        # 'aa_props_filter': range(1, (2**holygrail.NUM_AA_PROPS)),
+        # 'input_noise': [i / 10.0 for i in range(0, 10)],
+        # 'hidden_noise': [i / 10.0 for i in range(0, 10)],
+        'activ_func': 'relu',
+        'learning_rate': 0.004,
+        'momentum': 0.6,
+        'patience': 3,
+        'min_improvement': 0.1,
+        # 'validate_every': range(1, 25),
+        # 'batch_size': range(10, 50, 10),
+        # 'hidden_dropout': [i * 0.1 for i in range(0, 10)],
+        # 'input_dropout': [i * 0.1 for i in range(0, 10)]
+    }
+
+    results = defaultdict(list)
+
+    for _ in range(50):
+        x_train, y_train, x_test, y_test = sbclearn.split_data(data, 0.98)
+        regressor = Regressor(x_train, y_train)
+        regressor.train(hidden_layers=[60, 60], hyperparams=hyperparams)
+        results, error = regressor.predict(x_test, y_test, results=results)
+
     _output(results, error)
 
 if __name__ == '__main__':
