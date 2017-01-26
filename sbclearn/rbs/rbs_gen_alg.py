@@ -39,7 +39,7 @@ def main(args):
     }
 
     learn_gen_alg = gen_alg.LearnGeneticAlgorithm(pop_size=int(args[3]),
-                                                  data=data,
+                                                  data=data[:2],
                                                   split=float(args[1]),
                                                   tests=int(args[2]),
                                                   args=hyperparams,
