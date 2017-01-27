@@ -15,6 +15,7 @@ from collections import defaultdict
 
 from sklearn.metrics import classification_report, confusion_matrix, f1_score
 import numpy
+import scipy.stats
 import theanets
 
 import sbclearn
@@ -97,11 +98,10 @@ class Regressor(TheanetsBase):
             for tup in zip(*[y_test, preds]):
                 results[tup[0]].append(tup[1])
 
-            # The mean squared error:
-            error = \
-                numpy.mean([(x - y) ** 2
-                            for x, y in zip(results.keys(),
-                                            [numpy.mean(pred)
-                                             for pred in results.values()])])
+            # R squared:
+            _, _, r_value, _, _ = \
+                scipy.stats.linregress(results.keys(),
+                                       [numpy.mean(pred)
+                                        for pred in results.values()])
 
-            return results, error
+            return results, 1 - r_value

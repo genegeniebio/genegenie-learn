@@ -8,13 +8,13 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=no-member
-# pylint: disable=too-many-public-methods
 import random
 import unittest
 
 from sklearn import datasets
 from sklearn.datasets.samples_generator import make_blobs
 
+import sbclearn
 import sbclearn.theanets.theanets_utils as theanets_utils
 
 
@@ -25,7 +25,7 @@ class Test(unittest.TestCase):
         '''Tests the randomise_order method.'''
         list_a = [int(random.random() * 1000) for _ in range(0, 1024)]
         list_b = [v for v in list_a]
-        list_a, list_b = theanets_utils.randomise_order([list_a, list_b])
+        list_a, list_b = sbclearn.randomise_order([list_a, list_b])
 
         for i, val in enumerate(list_a):
             self.assertEqual(val, list_b[i])
@@ -69,7 +69,7 @@ class TestRegressor(unittest.TestCase):
         x_data = dataset.data.tolist()
         y_data = dataset.target.tolist()
 
-        x_data, y_data = theanets_utils.randomise_order([x_data, y_data])
+        x_data, y_data = sbclearn.randomise_order([x_data, y_data])
 
         # Split data into training and classifying:
         ind = int(0.8 * len(x_data))
@@ -80,4 +80,4 @@ class TestRegressor(unittest.TestCase):
         regressor.train(hidden_layers=[50, 50, 50])
         _, error = regressor.predict(x_data[ind:], y_data[ind:])
 
-        self.assertTrue(error < 10000)
+        self.assertTrue(error < 0.5)

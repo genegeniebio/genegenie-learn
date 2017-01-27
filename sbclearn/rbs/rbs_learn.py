@@ -70,7 +70,7 @@ def _output(val_res, test_res):
     '''Output results.'''
     print 'Validate'
     print '--------'
-    print 'Mean squared error: %.3f' % val_res[1]
+    print 'R squared: %.3f' % (1 - val_res[1])
     print
 
     _print_results(val_res[2], val_res[0].keys(), val_res[0].values())
@@ -83,7 +83,7 @@ def _output(val_res, test_res):
 
     _print_results(test_res[2], [float('NaN')] * len(test_res[0]), test_res[0])
 
-    _plot(val_res[0], test_res[0])
+    _plot(val_res[0])
 
 
 def _print_results(seqs, vals, preds):
@@ -99,7 +99,7 @@ def _print_results(seqs, vals, preds):
         print '\t'.join([str(res) for res in result])
 
 
-def _plot(val_res, test_res):
+def _plot(val_res):
     '''Plot results.'''
     import matplotlib.pyplot as plt
 
