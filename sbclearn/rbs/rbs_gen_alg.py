@@ -22,9 +22,8 @@ def main(args):
     data, _ = rbs_learn.get_data(args[0])
 
     hyperparams = {
-        # 'aa_props_filter': range(1, (2**holygrail.NUM_AA_PROPS)),
-        # 'input_noise': [i / 10.0 for i in range(0, 10)],
-        # 'hidden_noise': [i / 10.0 for i in range(0, 10)],
+        'input_noise': [i / 10.0 for i in range(0, 10)],
+        'hidden_noise': [i / 10.0 for i in range(0, 10)],
         'num_hidden_layers': range(1, 4),
         'num_nodes': range(10, 500, 10),
         'activ_func': ['relu', 'prelu', 'lgrelu'],
@@ -32,10 +31,10 @@ def main(args):
         'momentum': [x / 10.0 for x in range(0, 10)],
         'patience': range(1, 10),
         'min_improvement': [i / 1000.0 for i in range(1, 100)],
-        # 'validate_every': range(1, 25),
-        # 'batch_size': range(10, 50, 10),
-        # 'hidden_dropout': [i * 0.1 for i in range(0, 10)],
-        # 'input_dropout': [i * 0.1 for i in range(0, 10)]
+        'validate_every': range(1, 25),
+        'batch_size': range(10, 50, 10),
+        'hidden_dropout': [i * 0.1 for i in range(0, 10)],
+        'input_dropout': [i * 0.1 for i in range(0, 10)]
     }
 
     learn_gen_alg = gen_alg.LearnGeneticAlgorithm(pop_size=int(args[3]),
