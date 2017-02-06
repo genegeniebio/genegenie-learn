@@ -8,6 +8,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 from collections import defaultdict
+import csv
 import itertools
 import sys
 
@@ -22,7 +23,8 @@ def get_data(filename):
     data = _read_data(filename)
 
     x_data = data.keys()
-    y_data = [numpy.mean(vals) for vals in data.values()]
+    y_data = [numpy.mean([val['val'] for val in vals])
+              for vals in data.values()]
 
     variants = [list(set(val)) for val in zip(*x_data)]
 
@@ -40,18 +42,19 @@ def get_data(filename):
     x_data = [_encode_x_data(val) for val in seqs]
     x_all_data = [_encode_x_data(val) for val in all_seqs]
 
-    return [x_data, y_data, seqs], [x_all_data, None, all_seqs]
+    return [x_data, y_data, seqs], [x_all_data, None, all_seqs], data
 
 
 def _read_data(filename):
     '''Reads data.'''
     data = defaultdict(list)
 
-    with open(filename, 'rU') as infile:
-        for line in infile:
-            tokens = line.strip().split('\t')
-            data[tokens[0]].append(float(tokens[1]))
+    with open(filename, 'rU') as fle:
+        reader = csv.DictReader(fle)
 
+        for line in reader:
+            data[line['sr1'] + line['sr2']].append({'id': line['Construct'],
+                                                    'val': float(line['FC'])})
     return data
 
 
@@ -66,14 +69,18 @@ def _encode_x_data(x_data):
     return [val for nucl in x_data for val in x_vals[nucl]]
 
 
-def _output(val_res, test_res):
+def _output(val_res, test_res, meta_data):
     '''Output results.'''
     print 'Validate'
     print '--------'
     print 'R squared: %.3f' % (1 - val_res[1])
     print
 
-    _print_results(val_res[2], val_res[0].keys(), val_res[0].values())
+    ids = [str([value for terms in meta_data[seq]
+                for key, value in terms.iteritems() if key == 'id'])
+           for seq in val_res[2]]
+
+    _print_results(val_res[2], ids, val_res[0].keys(), val_res[0].values())
 
     print
     print
@@ -81,19 +88,21 @@ def _output(val_res, test_res):
     print '----'
     print
 
-    _print_results(test_res[2], [float('NaN')] * len(test_res[0]), test_res[0])
+    _print_results(test_res[2], [''] * len(test_res[0]),
+                   [float('NaN')] * len(test_res[0]), test_res[0])
 
     _plot(val_res[0])
 
 
-def _print_results(seqs, vals, preds):
+def _print_results(seqs, ids, vals, preds):
     '''Prints results.'''
     results = zip(seqs,
+                  ids,
                   vals,
                   [numpy.mean(pred) for pred in preds],
                   [numpy.std(pred) for pred in preds])
 
-    results.sort(key=lambda x: x[2], reverse=True)
+    results.sort(key=lambda x: x[3], reverse=True)
 
     for result in results:
         print '\t'.join([str(res) for res in result])
@@ -135,7 +144,7 @@ def _plot(val_res):
 
 def main(args):
     '''main method.'''
-    train_data, test_data = get_data(args[0])
+    train_data, test_data, meta_data = get_data(args[0])
 
     hyperparams = {
         # 'aa_props_filter': range(1, (2**holygrail.NUM_AA_PROPS)),
@@ -156,7 +165,7 @@ def main(args):
     test_results = []
 
     # Validate:
-    for _ in range(250):
+    for _ in range(50):
         x_train, y_train, x_test, y_test = sbclearn.split_data(train_data[:2],
                                                                0.9)
         regressor = Regressor(x_train, y_train)
@@ -165,7 +174,7 @@ def main(args):
                                                     results=validate_results)
 
     # Test:
-    for _ in range(250):
+    for _ in range(50):
         x_train, y_train, _, _ = sbclearn.split_data(train_data[:2], 1)
         regressor = Regressor(x_train, y_train)
         regressor.train(hidden_layers=[60, 60], hyperparams=hyperparams)
@@ -173,7 +182,8 @@ def main(args):
         test_results.append(test_result)
 
     _output([validate_results, error, train_data[2]],
-            [zip(*test_results), float('NaN'), test_data[2]])
+            [zip(*test_results), float('NaN'), test_data[2]],
+            meta_data)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
