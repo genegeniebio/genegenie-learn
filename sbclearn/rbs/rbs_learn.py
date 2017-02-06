@@ -165,7 +165,7 @@ def main(args):
     test_results = []
 
     # Validate:
-    for _ in range(50):
+    for _ in range(250):
         x_train, y_train, x_test, y_test = sbclearn.split_data(train_data[:2],
                                                                0.9)
         regressor = Regressor(x_train, y_train)
@@ -174,7 +174,7 @@ def main(args):
                                                     results=validate_results)
 
     # Test:
-    for _ in range(50):
+    for _ in range(250):
         x_train, y_train, _, _ = sbclearn.split_data(train_data[:2], 1)
         regressor = Regressor(x_train, y_train)
         regressor.train(hidden_layers=[60, 60], hyperparams=hyperparams)
