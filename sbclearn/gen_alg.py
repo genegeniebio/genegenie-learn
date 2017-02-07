@@ -11,6 +11,9 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=too-many-arguments
 from collections import defaultdict
 
+import numpy
+import scipy.stats
+
 from sbclearn.theanets.theanets_utils import Regressor
 import sbclearn
 import synbiochem.optimisation.gen_alg as gen_alg
@@ -56,12 +59,23 @@ class LearnGeneticAlgorithm(gen_alg.GeneticAlgorithm):
         results = defaultdict(list)
 
         for _ in range(self.__tests):
-            x_train, y_train, x_val, y_val = \
-                sbclearn.split_data(self.__data, self.__split)
+            data_split = sbclearn.split_data(self.__data, self.__split)
 
-            regressor = Regressor(x_train, y_train)
+            regressor = Regressor(data_split[0][0],
+                                  [[val] for val in data_split[1][0]])
+
             regressor.train(hidden_layers=hidden_layers,
                             hyperparams=hyperparams)
-            _, error = regressor.predict(x_val, y_val, results=results)
 
-        return error, results
+            y_preds, _ = regressor.predict(data_split[0][1],
+                                           data_split[1][1])
+
+            for tup in zip(data_split[1][1], y_preds):
+                results[tup[0]].append(tup[1])
+
+        _, _, r_value, _, _ = \
+            scipy.stats.linregress(results.keys(),
+                                   [numpy.mean(pred)
+                                    for pred in results.values()])
+
+        return 1 - r_value, results

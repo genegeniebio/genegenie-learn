@@ -18,14 +18,12 @@ import numpy
 
 def split_data(data, split=0.9):
     '''Split data.'''
-    x_data_rand, y_data_rand = randomise_order(data)
+    data_rand = randomise_order(data)
 
     # Split data into training and classifying:
-    ind = int(split * len(x_data_rand))
+    ind = int(split * len(data_rand[0]))
 
-    return x_data_rand[:ind], \
-        [[y] for y in y_data_rand[:ind]], \
-        x_data_rand[ind:], y_data_rand[ind:]
+    return [(array[:ind], array[ind:]) for array in data_rand]
 
 
 def randomise_order(data):

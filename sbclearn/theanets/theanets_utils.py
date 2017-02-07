@@ -11,8 +11,6 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-arguments
 
-from collections import defaultdict
-
 from sklearn.metrics import classification_report, confusion_matrix, f1_score
 import numpy
 import scipy.stats
@@ -85,23 +83,16 @@ class Regressor(TheanetsBase):
         super(Regressor, self).__init__(theanets.Regressor, (x_data, y_data),
                                         len(y_data[0]))
 
-    def predict(self, x_test, y_test=None, results=None):
+    def predict(self, x_test, y_test=None):
         '''Classifies and analyses test data.'''
-        preds = [val[0] for val in self._exp.network.predict(x_test)]
+        y_preds = [val[0] for val in self._exp.network.predict(x_test)]
+        error = None
 
-        if y_test is None:
-            return preds, None
-        else:
-            if results is None:
-                results = defaultdict(list)
-
-            for tup in zip(*[y_test, preds]):
-                results[tup[0]].append(tup[1])
-
+        if y_test is not None:
             # R squared:
             _, _, r_value, _, _ = \
-                scipy.stats.linregress(results.keys(),
-                                       [numpy.mean(pred)
-                                        for pred in results.values()])
+                scipy.stats.linregress(y_test, y_preds)
 
-            return results, 1 - r_value
+            error = 1 - r_value
+
+        return y_preds, error

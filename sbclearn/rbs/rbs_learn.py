@@ -13,6 +13,7 @@ import itertools
 import sys
 
 import numpy
+import scipy.stats
 
 from sbclearn.theanets.theanets_utils import Regressor
 import sbclearn
@@ -69,18 +70,18 @@ def _encode_x_data(x_data):
     return [val for nucl in x_data for val in x_vals[nucl]]
 
 
-def _output(val_res, test_res, meta_data):
+def _output(val_res, test_res):
     '''Output results.'''
+    _, _, r_value, _, _ = \
+        scipy.stats.linregress([key[2] for key in val_res.keys()],
+                               [numpy.mean(pred) for pred in val_res.values()])
+
     print 'Validate'
     print '--------'
-    print 'R squared: %.3f' % (1 - val_res[1])
+    print 'R squared: %.3f' % r_value
     print
 
-    ids = [str([value for terms in meta_data[seq]
-                for key, value in terms.iteritems() if key == 'id'])
-           for seq in val_res[2]]
-
-    _print_results(val_res[2], ids, val_res[0].keys(), val_res[0].values())
+    _print_results(val_res)
 
     print
     print
@@ -88,19 +89,18 @@ def _output(val_res, test_res, meta_data):
     print '----'
     print
 
-    _print_results(test_res[2], [''] * len(test_res[0]),
-                   [float('NaN')] * len(test_res[0]), test_res[0])
+    _print_results(test_res)
 
-    _plot(val_res[0])
+    _plot(val_res)
 
 
-def _print_results(seqs, ids, vals, preds):
+def _print_results(res):
     '''Prints results.'''
-    results = zip(seqs,
-                  ids,
-                  vals,
-                  [numpy.mean(pred) for pred in preds],
-                  [numpy.std(pred) for pred in preds])
+    results = zip([key[0] for key in res.keys()],
+                  [', '.join(key[1]) for key in res.keys()],
+                  [key[2] for key in res.keys()],
+                  [numpy.mean(pred) for pred in res.values()],
+                  [numpy.std(pred) for pred in res.values()])
 
     results.sort(key=lambda x: x[3], reverse=True)
 
@@ -124,17 +124,18 @@ def _plot(val_res):
     #             color='red')
 
     # Validate results:
-    plt.errorbar(val_res.keys(),
+    plt.errorbar([key[2] for key in val_res.keys()],
                  [numpy.mean(pred) for pred in val_res.values()],
                  yerr=[numpy.std(pred) for pred in val_res.values()],
                  fmt='o',
                  color='black')
 
-    fit = numpy.poly1d(numpy.polyfit(val_res.keys(),
+    fit = numpy.poly1d(numpy.polyfit([key[2] for key in val_res.keys()],
                                      [numpy.mean(pred)
                                       for pred in val_res.values()], 1))
 
-    plt.plot(val_res.keys(), fit(val_res.keys()), 'k')
+    plt.plot([key[2] for key in val_res.keys()],
+             fit([key[2] for key in val_res.keys()]), 'k')
 
     plt.xlim(0, 1.6)
     plt.ylim(0, 1.6)
@@ -162,28 +163,37 @@ def main(args):
     }
 
     validate_results = defaultdict(list)
-    test_results = []
+    test_results = defaultdict(list)
 
     # Validate:
-    for _ in range(250):
-        x_train, y_train, x_test, y_test = sbclearn.split_data(train_data[:2],
-                                                               0.9)
-        regressor = Regressor(x_train, y_train)
+    for _ in range(50):
+        data_split = sbclearn.split_data(train_data, 0.9)
+
+        regressor = Regressor(data_split[0][0],
+                              [[val] for val in data_split[1][0]])
+
         regressor.train(hidden_layers=[60, 60], hyperparams=hyperparams)
-        validate_results, error = regressor.predict(x_test, y_test,
-                                                    results=validate_results)
+        y_preds, _ = regressor.predict(data_split[0][1], data_split[1][1])
+
+        for tup in zip(data_split[2][1], data_split[1][1], y_preds):
+            validate_results[(tup[0], tuple([term['id']
+                                             for term in meta_data[tup[0]]]),
+                              tup[1])].append(tup[2])
 
     # Test:
-    for _ in range(250):
-        x_train, y_train, _, _ = sbclearn.split_data(train_data[:2], 1)
-        regressor = Regressor(x_train, y_train)
-        regressor.train(hidden_layers=[60, 60], hyperparams=hyperparams)
-        test_result, _ = regressor.predict(test_data[0], None)
-        test_results.append(test_result)
+    for _ in range(50):
+        data_split = sbclearn.split_data(train_data, 1)
 
-    _output([validate_results, error, train_data[2]],
-            [zip(*test_results), float('NaN'), test_data[2]],
-            meta_data)
+        regressor = Regressor(data_split[0][0],
+                              [[val] for val in data_split[1][0]])
+
+        regressor.train(hidden_layers=[60, 60], hyperparams=hyperparams)
+        y_preds, _ = regressor.predict(test_data[0], None)
+
+        for tup in zip(test_data[2], y_preds):
+            test_results[(tup[0], (), -1)].append(tup[1])
+
+    _output(validate_results, test_results)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
