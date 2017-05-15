@@ -23,6 +23,9 @@ class TheanetsBase(object):
         self._y_data = y_data
         self._exp = None
 
+        assert len(self._x_data) == len(self._y_data)
+        assert len(set([len(row) for row in self._x_data])) == 1
+
     def _train(self, num_outputs, valid_size, hidden_layers, hyperparams):
         '''Train the network.'''
         if hidden_layers is None:
