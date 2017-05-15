@@ -19,6 +19,13 @@ import numpy as np
 import pandas as pd
 
 
+def get_data(filename):
+    '''Gets data.'''
+    df = pd.read_table(filename, sep=',')
+    _preprocess_data(df)
+    return _get_data(df)
+
+
 def _preprocess_data(df):
     '''Preprocess data.'''
     df['r1'] = _align(df['r1'])
@@ -141,9 +148,7 @@ def _plot(results):
 
 def main(args):
     '''main method.'''
-    df = pd.read_table(args[0], sep=',')
-    _preprocess_data(df)
-    x_data, y_data, labels = _get_data(df)
+    x_data, y_data, labels = get_data(args[0])
     results = _learn(x_data, y_data, labels)
     _output(results)
 

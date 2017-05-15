@@ -11,26 +11,26 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=too-many-arguments
 from collections import defaultdict
 
-import numpy
+from sklearn import model_selection
 import scipy.stats
 
 from sbclearn.theanets.theanets_utils import Regressor
-import sbclearn
+import numpy as np
 import synbiochem.optimisation.gen_alg as gen_alg
 
 
 class LearnGeneticAlgorithm(gen_alg.GeneticAlgorithm):
     '''Class to optimise parameters for Classifier using a GA.'''
 
-    def __init__(self, pop_size, data, split, tests, args,
+    def __init__(self, pop_size, x_data, y_data, test_size, tests, args,
                  retain=0.2, random_select=0.05, mutate=0.01, verbose=False):
         '''Constructor.'''
         super(LearnGeneticAlgorithm, self).__init__(pop_size, args,
                                                     retain, random_select,
                                                     mutate, verbose)
-
-        self.__data = data
-        self.__split = split
+        self.__x_data = x_data
+        self.__y_data = y_data
+        self.__test_size = test_size
         self.__tests = tests
 
     def _fitness(self, individual):
@@ -59,23 +59,23 @@ class LearnGeneticAlgorithm(gen_alg.GeneticAlgorithm):
         results = defaultdict(list)
 
         for _ in range(self.__tests):
-            data_split = sbclearn.split_data(self.__data, self.__split)
+            x_train, x_test, y_train, y_test = \
+                model_selection.train_test_split(self.__x_data, self.__y_data,
+                                                 test_size=self.__test_size)
 
-            regressor = Regressor(data_split[0][0],
-                                  [[val] for val in data_split[1][0]])
+            regressor = Regressor(x_train, y_train)
 
             regressor.train(hidden_layers=hidden_layers,
                             hyperparams=hyperparams)
 
-            y_preds, _ = regressor.predict(data_split[0][1],
-                                           data_split[1][1])
+            y_preds = regressor.predict(x_test)
 
-            for tup in zip(data_split[1][1], y_preds):
+            for tup in zip(y_test, y_preds):
                 results[tup[0]].append(tup[1])
 
         _, _, r_value, _, _ = \
             scipy.stats.linregress(results.keys(),
-                                   [numpy.mean(pred)
+                                   [np.mean(pred)
                                     for pred in results.values()])
 
         return 1 - r_value, results

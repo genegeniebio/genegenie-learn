@@ -11,15 +11,15 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=too-many-arguments
 import sys
 
-from sbclearn import gen_alg
 from sbclearn.rbs import rbs_learn
+from sbclearn.theanets import gen_alg
 
 
 def main(args):
     '''main method.'''
 
     # Get random peptides that match structure patterns from PDB:
-    data, _, _ = rbs_learn.get_data(args[0])
+    x_data, y_data, _ = rbs_learn.get_data(args[0])
 
     hyperparams = {
         'input_noise': [i / 10.0 for i in range(0, 10)],
@@ -38,8 +38,9 @@ def main(args):
     }
 
     learn_gen_alg = gen_alg.LearnGeneticAlgorithm(pop_size=int(args[3]),
-                                                  data=data[:2],
-                                                  split=float(args[1]),
+                                                  x_data=x_data,
+                                                  y_data=y_data,
+                                                  test_size=float(args[1]),
                                                   tests=int(args[2]),
                                                   args=hyperparams,
                                                   retain=float(args[4]),
