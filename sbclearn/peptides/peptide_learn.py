@@ -8,17 +8,14 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=invalid-name
-from collections import defaultdict
 import sys
 
-from sklearn import preprocessing
+from sklearn import model_selection, preprocessing
 from synbiochem.utils import seq_utils
-import scipy.stats
 
 from sbclearn.theanets.theanets_utils import Regressor
 import numpy as np
 import pandas as pd
-import sbclearn
 
 
 def preprocess(df):
@@ -50,46 +47,26 @@ def set_objective(df):
     return df
 
 
-def learn(df):
+def learn(x_data, y_data):
     '''Learn.'''
-    hyperparams = {
-        # 'aa_props_filter': range(1, (2**holygrail.NUM_AA_PROPS)),
-        # 'input_noise': [i / 10.0 for i in range(0, 10)],
-        # 'hidden_noise': [i / 10.0 for i in range(0, 10)],
-        'activ_func': 'relu',
-        'learning_rate': 0.004,
-        'momentum': 0.6,
-        'patience': 3,
-        'min_improvement': 0.1,
-        # 'validate_every': range(1, 25),
-        # 'batch_size': range(10, 50, 10),
-        # 'hidden_dropout': [i * 0.1 for i in range(0, 10)],
-        # 'input_dropout': [i * 0.1 for i in range(0, 10)]
-    }
-
-    # Validate:
     for _ in range(50):
-        msk = np.random.rand(len(df)) < 0.95
-        train = df[msk]
-        test = df[~msk]
+        x_train, x_test, y_train, y_test = \
+            model_selection.train_test_split(x_data, y_data, test_size=0.05)
 
-        regressor = Regressor(train['encoded_peptides'].tolist(),
-                              [[y] for y in train['obj'].tolist()])
-        regressor.train(hidden_layers=[20, 20, 20], hyperparams=hyperparams)
+        regressor = Regressor(x_train, y_train)
+        regressor.train(hidden_layers=[100, 50, 25])
+        y_preds = regressor.predict(x_test)
 
-        y_preds, _ = regressor.predict(test['encoded_peptides'].tolist(),
-                                       test['obj'].tolist())
-
-        print test['obj']
-        print y_preds
+        for tup in zip(y_test, y_preds):
+            print tup
 
 
 def main(args):
     '''main method.'''
     df = preprocess(pd.read_table(args[0]))
     df = set_objective(df)
-    df['encoded_peptides'] = seq_utils.get_aa_props(df['Sequence'].tolist())
-    learn(df)
+    learn(np.array(seq_utils.get_aa_props(df['Sequence'].tolist())),
+          df['obj'])
 
 
 if __name__ == '__main__':
