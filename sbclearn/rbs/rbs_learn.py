@@ -23,23 +23,7 @@ def get_data(filename):
     '''Gets data.'''
     df = pd.read_table(filename, sep=',')
     _preprocess_data(df)
-    return _get_data(df)
 
-
-def _preprocess_data(df):
-    '''Preprocess data.'''
-    df['r1'] = _align(df['r1'])
-    df['r2'] = _align(df['r2'])
-
-
-def _align(col):
-    '''Perform multiple sequence alignment.'''
-    # TODO: Implement multiple sequence alignment,
-    return col
-
-
-def _get_data(df):
-    '''Gets data.'''
     # TODO: deal with duplicate sequences (same seq, different vals)
     x_data = np.array(_encode_seqs(df['r1'] + df['r2']))
     y_data = df['FC']
@@ -48,20 +32,7 @@ def _get_data(df):
     return x_data, y_data, labels
 
 
-def _encode_seqs(seqs):
-    '''Encodes x data.'''
-    encoding = {'A': [1, 0, 0, 0],
-                'C': [0, 1, 0, 0],
-                'G': [0, 0, 1, 0],
-                'T': [0, 0, 0, 0],
-                '-': [0.25, 0.25, 0.25, 0.25]}
-
-    return [[item for sublist in [encoding[nucl] for nucl in seq]
-             for item in sublist]
-            for seq in seqs]
-
-
-def _learn(x_data, y_data, labels):
+def learn(x_data, y_data, labels):
     '''Learn.'''
     hyperparams = {
         # 'input_noise': [i / 10.0 for i in range(0, 10)],
@@ -92,6 +63,31 @@ def _learn(x_data, y_data, labels):
             results[(tup[2], tup[0])].append(tup[1])
 
     return results
+
+
+def _preprocess(df):
+    '''Preprocess data.'''
+    df['r1'] = _align(df['r1'])
+    df['r2'] = _align(df['r2'])
+
+
+def _align(col):
+    '''Perform multiple sequence alignment.'''
+    # TODO: Implement multiple sequence alignment,
+    return col
+
+
+def _encode_seqs(seqs):
+    '''Encodes x data.'''
+    encoding = {'A': [1, 0, 0, 0],
+                'C': [0, 1, 0, 0],
+                'G': [0, 0, 1, 0],
+                'T': [0, 0, 0, 0],
+                '-': [0.25, 0.25, 0.25, 0.25]}
+
+    return [[item for sublist in [encoding[nucl] for nucl in seq]
+             for item in sublist]
+            for seq in seqs]
 
 
 def _output(results):

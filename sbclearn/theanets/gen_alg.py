@@ -11,8 +11,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=too-many-arguments
 from collections import defaultdict
 
-from sklearn import model_selection
-import scipy.stats
+from sklearn import metrics, model_selection
 
 from sbclearn.theanets.theanets_utils import Regressor
 import numpy as np
@@ -73,9 +72,8 @@ class LearnGeneticAlgorithm(gen_alg.GeneticAlgorithm):
             for tup in zip(y_test, y_preds):
                 results[tup[0]].append(tup[1])
 
-        _, _, r_value, _, _ = \
-            scipy.stats.linregress(results.keys(),
-                                   [np.mean(pred)
-                                    for pred in results.values()])
+        err = metrics.mean_squared_error(results.keys(),
+                                         [np.mean(pred)
+                                          for pred in results.values()])
 
-        return 1 - r_value, results
+        return err, results

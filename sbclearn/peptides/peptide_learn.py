@@ -18,7 +18,32 @@ import numpy as np
 import pandas as pd
 
 
-def preprocess(df):
+def get_data(filename):
+    '''Gets data.'''
+    df = _preprocess(pd.read_table(filename))
+    df = set_objective(df)
+    x_data = np.array(seq_utils.get_aa_props(df['Sequence'].tolist()))
+    y_data = df['obj']
+    labels = df['Sequence']
+
+    return x_data, y_data, labels
+
+
+def learn(x_data, y_data):
+    '''Learn.'''
+    for _ in range(50):
+        x_train, x_test, y_train, y_test = \
+            model_selection.train_test_split(x_data, y_data, test_size=0.05)
+
+        regressor = Regressor(x_train, y_train)
+        regressor.train(hidden_layers=[100, 50, 25])
+        y_preds = regressor.predict(x_test)
+
+        for tup in zip(y_test, y_preds):
+            print tup
+
+
+def _preprocess(df):
     '''Format data.'''
 
     # Liquid required at pH 4:
@@ -47,26 +72,10 @@ def set_objective(df):
     return df
 
 
-def learn(x_data, y_data):
-    '''Learn.'''
-    for _ in range(50):
-        x_train, x_test, y_train, y_test = \
-            model_selection.train_test_split(x_data, y_data, test_size=0.05)
-
-        regressor = Regressor(x_train, y_train)
-        regressor.train(hidden_layers=[100, 50, 25])
-        y_preds = regressor.predict(x_test)
-
-        for tup in zip(y_test, y_preds):
-            print tup
-
-
 def main(args):
     '''main method.'''
-    df = preprocess(pd.read_table(args[0]))
-    df = set_objective(df)
-    learn(np.array(seq_utils.get_aa_props(df['Sequence'].tolist())),
-          df['obj'])
+    x_data, y_data, _ = get_data(args[0])
+    learn(x_data, y_data)
 
 
 if __name__ == '__main__':
