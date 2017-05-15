@@ -1,9 +1,9 @@
 '''
-synbiochem (c) University of Manchester 2015
+sbclearn (c) University of Manchester 2017
 
-synbiochem is licensed under the MIT License.
+sbclearn is licensed under the MIT License.
 
 To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
-@author: neilswainston
+@author:  neilswainston
 '''
