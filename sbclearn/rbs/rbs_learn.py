@@ -7,148 +7,56 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+# pylint: disable=invalid-name
 from collections import defaultdict
-import csv
-import itertools
 import sys
 
-import numpy
+from sklearn import model_selection
 import scipy.stats
 
 from sbclearn.theanets.theanets_utils import Regressor
-import sbclearn
+import numpy as np
+import pandas as pd
 
 
-def get_data(filename):
+def _preprocess_data(df):
+    '''Preprocess data.'''
+    df['r1'] = _align(df['r1'])
+    df['r2'] = _align(df['r2'])
+
+
+def _align(col):
+    '''Perform multiple sequence alignment.'''
+    # TODO: Implement multiple sequence alignment,
+    return col
+
+
+def _get_data(df):
     '''Gets data.'''
-    data = _read_data(filename)
+    # TODO: deal with duplicate sequences (same seq, different vals)
+    x_data = np.array(_encode_seqs(df['r1'] + df['r2']))
+    y_data = df['FC']
+    labels = df['Construct']
 
-    x_data = data.keys()
-    y_data = [numpy.mean([val['val'] for val in vals])
-              for vals in data.values()]
-
-    variants = [list(set(val)) for val in zip(*x_data)]
-
-    seqs = [''.join(vals) for vals in zip(*[val
-                                            for val in zip(*x_data)
-                                            if len(set(val)) > 1])]
-
-    all_seqs = [''.join(combo)
-                for combo in itertools.product(*[var
-                                                 for var in variants
-                                                 if len(var) > 1])]
-
-    all_seqs = [seq for seq in all_seqs if seq not in seqs]
-
-    x_data = [_encode_x_data(val) for val in seqs]
-    x_all_data = [_encode_x_data(val) for val in all_seqs]
-
-    return [x_data, y_data, seqs], [x_all_data, None, all_seqs], data
+    return x_data, y_data, labels
 
 
-def _read_data(filename):
-    '''Reads data.'''
-    data = defaultdict(list)
-
-    with open(filename, 'rU') as fle:
-        reader = csv.DictReader(fle)
-
-        for line in reader:
-            data[line['sr1'] + line['sr2']].append({'id': line['Construct'],
-                                                    'val': float(line['FC'])})
-    return data
-
-
-def _encode_x_data(x_data):
+def _encode_seqs(seqs):
     '''Encodes x data.'''
-    x_vals = {'A': (1, 0, 0, 0, 0),
-              'C': (0, 1, 0, 0, 0),
-              'G': (0, 0, 1, 0, 0),
-              'T': (0, 0, 0, 1, 0),
-              '-': (0, 0, 0, 0, 1)}
+    encoding = {'A': [1, 0, 0, 0],
+                'C': [0, 1, 0, 0],
+                'G': [0, 0, 1, 0],
+                'T': [0, 0, 0, 0],
+                '-': [0.25, 0.25, 0.25, 0.25]}
 
-    return [val for nucl in x_data for val in x_vals[nucl]]
-
-
-def _output(val_res, test_res):
-    '''Output results.'''
-    _, _, r_value, _, _ = \
-        scipy.stats.linregress([key[2] for key in val_res.keys()],
-                               [numpy.mean(pred) for pred in val_res.values()])
-
-    print 'Validate'
-    print '--------'
-    print 'R squared: %.3f' % r_value
-    print
-
-    _print_results(val_res)
-
-    print
-    print
-    print 'Test'
-    print '----'
-    print
-
-    _print_results(test_res)
-
-    _plot(val_res)
+    return [[item for sublist in [encoding[nucl] for nucl in seq]
+             for item in sublist]
+            for seq in seqs]
 
 
-def _print_results(res):
-    '''Prints results.'''
-    results = zip([key[0] for key in res.keys()],
-                  [', '.join(key[1]) for key in res.keys()],
-                  [key[2] for key in res.keys()],
-                  [numpy.mean(pred) for pred in res.values()],
-                  [numpy.std(pred) for pred in res.values()])
-
-    results.sort(key=lambda x: x[3], reverse=True)
-
-    for result in results:
-        print '\t'.join([str(res) for res in result])
-
-
-def _plot(val_res):
-    '''Plot results.'''
-    import matplotlib.pyplot as plt
-
-    plt.title('Prediction of limonene production from RBS seqs')
-    plt.xlabel('Measured')
-    plt.ylabel('Predicted')
-
-    # Test results:
-    # plt.errorbar([numpy.mean(pred) for pred in test_res],
-    #             [numpy.mean(pred) for pred in test_res],
-    #             yerr=[numpy.std(pred) for pred in test_res],
-    #             fmt='o',
-    #             color='red')
-
-    # Validate results:
-    plt.errorbar([key[2] for key in val_res.keys()],
-                 [numpy.mean(pred) for pred in val_res.values()],
-                 yerr=[numpy.std(pred) for pred in val_res.values()],
-                 fmt='o',
-                 color='black')
-
-    fit = numpy.poly1d(numpy.polyfit([key[2] for key in val_res.keys()],
-                                     [numpy.mean(pred)
-                                      for pred in val_res.values()], 1))
-
-    plt.plot([key[2] for key in val_res.keys()],
-             fit([key[2] for key in val_res.keys()]), 'k')
-
-    plt.xlim(0, 1.6)
-    plt.ylim(0, 1.6)
-
-    plt.show()
-
-
-def main(args):
-    '''main method.'''
-    train_data, test_data, meta_data = get_data(args[0])
-
+def _learn(x_data, y_data, labels):
+    '''Learn.'''
     hyperparams = {
-        # 'aa_props_filter': range(1, (2**holygrail.NUM_AA_PROPS)),
         # 'input_noise': [i / 10.0 for i in range(0, 10)],
         # 'hidden_noise': [i / 10.0 for i in range(0, 10)],
         'activ_func': 'relu',
@@ -162,38 +70,82 @@ def main(args):
         # 'input_dropout': [i * 0.1 for i in range(0, 10)]
     }
 
-    validate_results = defaultdict(list)
-    test_results = defaultdict(list)
+    results = defaultdict(list)
 
-    # Validate:
     for _ in range(50):
-        data_split = sbclearn.split_data(train_data, 0.9)
+        x_train, x_test, y_train, y_test, _, labels_test = \
+            model_selection.train_test_split(x_data, y_data, labels,
+                                             test_size=0.1)
 
-        regressor = Regressor(data_split[0][0],
-                              [[val] for val in data_split[1][0]])
-
+        regressor = Regressor(x_train, y_train)
         regressor.train(hidden_layers=[60, 60], hyperparams=hyperparams)
-        y_preds, _ = regressor.predict(data_split[0][1], data_split[1][1])
+        y_preds = regressor.predict(x_test)
 
-        for tup in zip(data_split[2][1], data_split[1][1], y_preds):
-            validate_results[(tup[0], tuple([term['id']
-                                             for term in meta_data[tup[0]]]),
-                              tup[1])].append(tup[2])
+        for tup in zip(y_test, y_preds, labels_test):
+            results[(tup[2], tup[0])].append(tup[1])
 
-    # Test:
-    for _ in range(50):
-        data_split = sbclearn.split_data(train_data, 1)
+    return results
 
-        regressor = Regressor(data_split[0][0],
-                              [[val] for val in data_split[1][0]])
 
-        regressor.train(hidden_layers=[60, 60], hyperparams=hyperparams)
-        y_preds, _ = regressor.predict(test_data[0], None)
+def _output(results):
+    '''Output results.'''
+    _, _, r_value, _, _ = \
+        scipy.stats.linregress([key[1] for key in results.keys()],
+                               [np.mean(pred) for pred in results.values()])
 
-        for tup in zip(test_data[2], y_preds):
-            test_results[(tup[0], (), -1)].append(tup[1])
+    print
+    print
+    print '--------'
+    print 'R squared: %.3f' % r_value
+    print
 
-    _output(validate_results, test_results)
+    res = zip([key[0] for key in results.keys()],
+              [key[1] for key in results.keys()],
+              [np.mean(pred) for pred in results.values()],
+              [np.std(pred) for pred in results.values()])
+
+    res.sort(key=lambda x: x[2], reverse=True)
+
+    for result in res:
+        print '\t'.join([str(r) for r in result])
+
+    _plot(results)
+
+
+def _plot(results):
+    '''Plot results.'''
+    import matplotlib.pyplot as plt
+
+    plt.title('Prediction of limonene production from RBS seqs')
+    plt.xlabel('Measured')
+    plt.ylabel('Predicted')
+
+    plt.errorbar([key[1] for key in results.keys()],
+                 [np.mean(pred) for pred in results.values()],
+                 yerr=[np.std(pred) for pred in results.values()],
+                 fmt='o',
+                 color='red')
+
+    fit = np.poly1d(np.polyfit([key[1] for key in results.keys()],
+                               [np.mean(pred)
+                                for pred in results.values()], 1))
+
+    plt.plot([key[1] for key in results.keys()],
+             fit([key[1] for key in results.keys()]), 'r')
+
+    plt.xlim(0, 1.6)
+    plt.ylim(0, 1.6)
+
+    plt.show()
+
+
+def main(args):
+    '''main method.'''
+    df = pd.read_table(args[0], sep=',')
+    _preprocess_data(df)
+    x_data, y_data, labels = _get_data(df)
+    results = _learn(x_data, y_data, labels)
+    _output(results)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
