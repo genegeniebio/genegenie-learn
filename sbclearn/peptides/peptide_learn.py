@@ -22,6 +22,10 @@ def get_data(filename):
     '''Gets data.'''
     df = _preprocess(pd.read_table(filename))
     df = set_objective(df)
+
+    # print df
+    # df.to_csv('csv.txt')
+
     x_data = np.array(seq_utils.get_aa_props(df['Sequence'].tolist()))
     y_data = df['obj']
     labels = df['Sequence']
@@ -58,10 +62,15 @@ def _preprocess(df):
     df.loc[df['Physical state pH7'] == 'P', 'Physical state pH7'] = 1.0
 
     # Normalise:
-    x_scaled = preprocessing.MinMaxScaler().fit_transform(df.ix[:, 2:])
-    df_scaled = pd.DataFrame(x_scaled)
-    df_scaled.columns = df.ix[:, 2:].columns
-    df = pd.concat([df.ix[:, :2], df_scaled], axis=1)
+    num = preprocessing.MinMaxScaler().fit_transform(df.ix[:, 2:])
+
+    # Maximise:
+    df_num = pd.DataFrame(num)
+    df_num = df_num.applymap(lambda x: 1 - x)
+
+    # Reform DataFrame:
+    df_num.columns = df.ix[:, 2:].columns
+    df = pd.concat([df.ix[:, :2], df_num], axis=1)
 
     return df
 
