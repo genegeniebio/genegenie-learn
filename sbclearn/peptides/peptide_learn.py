@@ -40,7 +40,7 @@ def learn(x_data, y_data):
             model_selection.train_test_split(x_data, y_data, test_size=0.05)
 
         regressor = Regressor(x_train, y_train)
-        regressor.train(hidden_layers=[100, 50, 25])
+        regressor.train(hidden_layers=[100])
         y_preds = regressor.predict(x_test)
 
         for tup in zip(y_test, y_preds):
@@ -62,7 +62,8 @@ def _preprocess(df):
     df.loc[df['Physical state pH7'] == 'P', 'Physical state pH7'] = 1.0
 
     # Normalise:
-    num = preprocessing.MinMaxScaler().fit_transform(df.ix[:, 2:])
+    num = preprocessing.MinMaxScaler(
+        feature_range=(0.1, 0.9)).fit_transform(df.ix[:, 2:])
 
     # Maximise:
     df_num = pd.DataFrame(num)
@@ -77,7 +78,7 @@ def _preprocess(df):
 
 def set_objective(df):
     '''Set composite objective.'''
-    df['obj'] = df.ix[:, 2:].sum(axis=1)
+    df['obj'] = df.ix[:, 2:].prod(axis=1)
     return df
 
 
