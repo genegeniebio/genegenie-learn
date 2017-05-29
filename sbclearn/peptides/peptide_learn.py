@@ -8,11 +8,11 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=invalid-name
+from collections import defaultdict
 import sys
 
 from sklearn import model_selection, preprocessing
 from synbiochem.utils import seq_utils
-from _collections import defaultdict
 
 from sbclearn.theanets.theanets_utils import Regressor
 import numpy as np
