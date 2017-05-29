@@ -22,7 +22,7 @@ import pandas as pd
 def get_data(filename):
     '''Gets data.'''
     df = pd.read_table(filename, sep=',')
-    _preprocess_data(df)
+    _preprocess(df)
 
     # TODO: deal with duplicate sequences (same seq, different vals)
     x_data = np.array(_encode_seqs(df['r1'] + df['r2']))
@@ -145,7 +145,7 @@ def _plot(results):
 def main(args):
     '''main method.'''
     x_data, y_data, labels = get_data(args[0])
-    results = _learn(x_data, y_data, labels)
+    results = learn(x_data, y_data, labels)
     _output(results)
 
 if __name__ == '__main__':

@@ -12,11 +12,11 @@ from collections import defaultdict
 import sys
 
 from sklearn import model_selection, preprocessing
-from synbiochem.utils import seq_utils
 
 from sbclearn.theanets.theanets_utils import Regressor
 import numpy as np
 import pandas as pd
+import sbclearn
 
 
 def get_data(filename):
@@ -27,7 +27,7 @@ def get_data(filename):
     # print df
     # df.to_csv('csv.txt')
 
-    x_data = np.array(seq_utils.get_aa_props(df['Sequence'].tolist()))
+    x_data = np.array(sbclearn.get_aa_props(df['Sequence'].tolist()))
     y_data = df['obj']
     labels = df['Sequence']
 
