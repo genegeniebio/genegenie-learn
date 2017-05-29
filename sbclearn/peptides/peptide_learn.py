@@ -12,6 +12,7 @@ import sys
 
 from sklearn import model_selection, preprocessing
 from synbiochem.utils import seq_utils
+from _collections import defaultdict
 
 from sbclearn.theanets.theanets_utils import Regressor
 import numpy as np
@@ -35,6 +36,8 @@ def get_data(filename):
 
 def learn(x_data, y_data):
     '''Learn.'''
+    results = defaultdict(list)
+
     for _ in range(50):
         x_train, x_test, y_train, y_test = \
             model_selection.train_test_split(x_data, y_data, test_size=0.05)
@@ -43,8 +46,13 @@ def learn(x_data, y_data):
         regressor.train(hidden_layers=[100])
         y_preds = regressor.predict(x_test)
 
-        for tup in zip(y_test, y_preds):
-            print tup
+        for test, pred in zip(y_test, y_preds):
+            results[test].append(pred[0])
+
+    for key, value in results.iteritems():
+        print str(key) + '\t' + str(np.mean(value))
+
+    _plot(results)
 
 
 def _preprocess(df):
@@ -74,6 +82,30 @@ def _preprocess(df):
     df = pd.concat([df.ix[:, :2], df_num], axis=1)
 
     return df
+
+
+def _plot(results):
+    '''Plot results.'''
+    import matplotlib.pyplot as plt
+
+    plt.title('Prediction of peptide fitness')
+    plt.xlabel('Measured')
+    plt.ylabel('Predicted')
+
+    plt.errorbar(results.keys(),
+                 [np.mean(pred) for pred in results.values()],
+                 yerr=[np.std(pred) for pred in results.values()],
+                 fmt='o',
+                 color='red')
+
+    fit = np.poly1d(np.polyfit(results.keys(),
+                               [np.mean(pred)
+                                for pred in results.values()], 1))
+
+    plt.plot(results.keys(),
+             fit(results.keys()), 'r')
+
+    plt.show()
 
 
 def set_objective(df):
