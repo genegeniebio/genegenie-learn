@@ -74,12 +74,11 @@ def _preprocess(df):
         feature_range=(0.1, 0.9)).fit_transform(df.ix[:, 2:])
 
     # Maximise:
-    df_num = pd.DataFrame(num)
-    df_num = df_num.applymap(lambda x: 1 - x)
+    df_ser = pd.DataFrame(num).applymap(lambda x: 1 - x)
 
     # Reform DataFrame:
-    df_num.columns = df.ix[:, 2:].columns
-    df = pd.concat([df.ix[:, :2], df_num], axis=1)
+    df_ser.columns = df.ix[:, 2:].columns
+    df = pd.concat([df.ix[:, :2], df_ser], axis=1)
 
     return df
 
