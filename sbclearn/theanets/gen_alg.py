@@ -13,9 +13,9 @@ from collections import defaultdict
 
 from sklearn import metrics, model_selection
 
+from sbclearn.optimisation import gen_alg
 from sbclearn.theanets.theanets_utils import Regressor
 import numpy as np
-import synbiochem.optimisation.gen_alg as gen_alg
 
 
 class LearnGeneticAlgorithm(gen_alg.GeneticAlgorithm):
