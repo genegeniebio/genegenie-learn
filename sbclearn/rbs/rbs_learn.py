@@ -37,11 +37,11 @@ def learn(x_data, y_data, labels):
     hyperparams = {
         # 'input_noise': [i / 10.0 for i in range(0, 10)],
         # 'hidden_noise': [i / 10.0 for i in range(0, 10)],
-        'activ_func': 'relu',
-        'learning_rate': 0.004,
-        'momentum': 0.6,
-        'patience': 3,
-        'min_improvement': 0.1,
+        # 'activ_func': 'relu',
+        # 'learning_rate': 0.004,
+        # 'momentum': 0.6,
+        # 'patience': 3,
+        # 'min_improvement': 0.1,
         # 'validate_every': range(1, 25),
         # 'batch_size': range(10, 50, 10),
         # 'hidden_dropout': [i * 0.1 for i in range(0, 10)],
@@ -92,14 +92,15 @@ def _encode_seqs(seqs):
 
 def _output(results):
     '''Output results.'''
-    _, _, r_value, _, _ = \
+    slope, _, r_value, _, _ = \
         scipy.stats.linregress([key[1] for key in results.keys()],
                                [np.mean(pred) for pred in results.values()])
 
     print
     print
     print '--------'
-    print 'R squared: %.3f' % r_value
+    print 'Slope:\t%.3f' % slope
+    print 'R2:\t%.3f' % r_value
     print
 
     res = zip([key[0] for key in results.keys()],
