@@ -21,13 +21,13 @@ import pandas as pd
 
 def get_data(filename):
     '''Gets data.'''
-    df = pd.read_table(filename, sep=',')
-    _preprocess(df)
+    df = pd.read_table(filename)
 
+    # TODO: Implement multiple sequence alignment,
     # TODO: deal with duplicate sequences (same seq, different vals)
-    x_data = np.array(_encode_seqs(df['r1'] + df['r2']))
-    y_data = df['FC']
-    labels = df['Construct']
+    x_data = np.array(_encode_seqs(df['Sequence']))
+    y_data = df['Output']
+    labels = df['id']
 
     return x_data, y_data, labels
 
@@ -63,18 +63,6 @@ def learn(x_data, y_data, labels):
             results[(tup[2], tup[0])].append(tup[1])
 
     return results
-
-
-def _preprocess(df):
-    '''Preprocess data.'''
-    df['r1'] = _align(df['r1'])
-    df['r2'] = _align(df['r2'])
-
-
-def _align(col):
-    '''Perform multiple sequence alignment.'''
-    # TODO: Implement multiple sequence alignment,
-    return col
 
 
 def _encode_seqs(seqs):
@@ -136,9 +124,6 @@ def _plot(results):
 
     plt.plot([key[1] for key in results.keys()],
              fit([key[1] for key in results.keys()]), 'r')
-
-    plt.xlim(0, 1.6)
-    plt.ylim(0, 1.6)
 
     plt.show()
 
