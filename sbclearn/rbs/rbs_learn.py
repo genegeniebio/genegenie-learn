@@ -8,6 +8,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=invalid-name
+# pylint: disable=todo
 from collections import defaultdict
 import sys
 
@@ -15,6 +16,7 @@ from sklearn import model_selection
 import scipy.stats
 
 from sbclearn.theanets.theanets_utils import Regressor
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -66,7 +68,15 @@ def learn(x_data, y_data, labels):
 
 
 def _encode_seqs(seqs):
-    '''Encodes x data.'''
+    '''Encodes sequences.'''
+    stripped_seqs = []
+
+    for pos in zip(*seqs.tolist()):
+        if len(set(pos)) > 1:
+            stripped_seqs.append(pos)
+
+    stripped_seqs = [''.join(nucls) for nucls in zip(*stripped_seqs)]
+
     encoding = {'A': [1, 0, 0, 0],
                 'C': [0, 1, 0, 0],
                 'G': [0, 0, 1, 0],
@@ -75,7 +85,7 @@ def _encode_seqs(seqs):
 
     return [[item for sublist in [encoding[nucl] for nucl in seq]
              for item in sublist]
-            for seq in seqs]
+            for seq in stripped_seqs]
 
 
 def _output(results):
@@ -106,8 +116,6 @@ def _output(results):
 
 def _plot(results):
     '''Plot results.'''
-    import matplotlib.pyplot as plt
-
     plt.title('Prediction of limonene production from RBS seqs')
     plt.xlabel('Measured')
     plt.ylabel('Predicted')
