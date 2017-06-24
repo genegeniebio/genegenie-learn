@@ -8,6 +8,8 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=too-few-public-methods
+from collections import defaultdict
+
 from sklearn import model_selection
 import theanets
 
@@ -81,3 +83,36 @@ class Regressor(TheanetsBase):
     def predict(self, x_test):
         '''Predicts test data.'''
         return self._exp.network.predict(x_test)
+
+
+def k_fold_cross_valid((x_data, y_data), tests=50, test_size=0.05,
+                       hidden_layers=None, hyperparams=None):
+    '''k-fold cross validation.'''
+    results = defaultdict(list)
+
+    for _ in range(tests):
+        x_train, x_test, y_train, y_test = \
+            model_selection.train_test_split(x_data, y_data,
+                                             test_size=test_size)
+
+        regressor = Regressor(x_train, y_train)
+        regressor.train(hidden_layers=hidden_layers, hyperparams=hyperparams)
+
+        for test, pred in zip(y_test, regressor.predict(x_test)):
+            results[test].append(pred[0])
+
+    return results
+
+# hyperparams = {
+    # 'input_noise': [i / 10.0 for i in range(0, 10)],
+    # 'hidden_noise': [i / 10.0 for i in range(0, 10)],
+    # 'activ_func': 'relu',
+    # 'learning_rate': 0.004,
+    # 'momentum': 0.6,
+    # 'patience': 3,
+    # 'min_improvement': 0.1,
+    # 'validate_every': range(1, 25),
+    # 'batch_size': range(10, 50, 10),
+    # 'hidden_dropout': [i * 0.1 for i in range(0, 10)],
+    # 'input_dropout': [i * 0.1 for i in range(0, 10)]
+#    }

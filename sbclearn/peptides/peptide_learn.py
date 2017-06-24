@@ -8,12 +8,14 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=invalid-name
-from collections import defaultdict
+# pylint: disable=no-member
+# pylint: disable=ungrouped-imports
 import sys
 
-from sklearn import model_selection, preprocessing
+from sklearn import preprocessing
 
-from sbclearn.theanets.theanets_utils import Regressor
+from sbclearn.theanets import theanets_utils
+
 import numpy as np
 import pandas as pd
 import sbclearn
@@ -21,42 +23,7 @@ import sbclearn
 
 def get_data(filename):
     '''Gets data.'''
-    df = _preprocess(pd.read_table(filename))
-    df = set_objective(df)
-
-    # print df
-    # df.to_csv('csv.txt')
-
-    x_data = np.array(sbclearn.get_aa_props(df['Sequence'].tolist()))
-    y_data = df['obj']
-    labels = df['Sequence']
-
-    return x_data, y_data, labels
-
-
-def learn(x_data, y_data):
-    '''Learn.'''
-    results = defaultdict(list)
-
-    for _ in range(50):
-        x_train, x_test, y_train, y_test = \
-            model_selection.train_test_split(x_data, y_data, test_size=0.05)
-
-        regressor = Regressor(x_train, y_train)
-        regressor.train(hidden_layers=[100])
-        y_preds = regressor.predict(x_test)
-
-        for test, pred in zip(y_test, y_preds):
-            results[test].append(pred[0])
-
-    for key, value in results.iteritems():
-        print str(key) + '\t' + str(np.mean(value))
-
-    _plot(results)
-
-
-def _preprocess(df):
-    '''Format data.'''
+    df = pd.read_table(filename)
 
     # Liquid required at pH 4:
     df.loc[df['Physical state pH4'] == 'L', 'Physical state pH4'] = 0.0
@@ -80,43 +47,22 @@ def _preprocess(df):
     df_ser.columns = df.ix[:, 2:].columns
     df = pd.concat([df.ix[:, :2], df_ser], axis=1)
 
-    return df
-
-
-def _plot(results):
-    '''Plot results.'''
-    import matplotlib.pyplot as plt
-
-    plt.title('Prediction of peptide fitness')
-    plt.xlabel('Measured')
-    plt.ylabel('Predicted')
-
-    plt.errorbar(results.keys(),
-                 [np.mean(pred) for pred in results.values()],
-                 yerr=[np.std(pred) for pred in results.values()],
-                 fmt='o',
-                 color='red')
-
-    fit = np.poly1d(np.polyfit(results.keys(),
-                               [np.mean(pred)
-                                for pred in results.values()], 1))
-
-    plt.plot(results.keys(),
-             fit(results.keys()), 'r')
-
-    plt.show()
-
-
-def set_objective(df):
-    '''Set composite objective.'''
+    # Set objective:
     df['obj'] = df.ix[:, 2:].prod(axis=1)
-    return df
+
+    x_data = np.array(sbclearn.get_aa_props(df['Sequence'].tolist()))
+    y_data = df['obj']
+    labels = df['Sequence']
+
+    return x_data, y_data, labels
 
 
 def main(args):
     '''main method.'''
     x_data, y_data, _ = get_data(args[0])
-    learn(x_data, y_data)
+    results = theanets_utils.k_fold_cross_valid((x_data, y_data))
+    sbclearn.output(results)
+    sbclearn.plot(results, 'Prediction of peptide fitness')
 
 
 if __name__ == '__main__':

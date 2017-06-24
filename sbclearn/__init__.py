@@ -9,7 +9,12 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 import collections
 import itertools
+
+from scipy.stats import linregress
+
+import matplotlib.pyplot as plt
 import numpy as np
+
 
 # KD Hydrophobicity, EIIP, Helix, Sheet, Turn
 AA_PROPS = {
@@ -36,6 +41,43 @@ AA_PROPS = {
 }
 
 NUM_AA_PROPS = len(AA_PROPS['A'])
+
+
+def plot(results, title):
+    '''Plot results.'''
+    plt.title(title)
+    plt.xlabel('Measured')
+    plt.ylabel('Predicted')
+
+    plt.errorbar(results.keys(),
+                 [np.mean(pred) for pred in results.values()],
+                 yerr=[np.std(pred) for pred in results.values()],
+                 fmt='o',
+                 color='red')
+
+    fit = np.poly1d(np.polyfit(results.keys(),
+                               [np.mean(pred)
+                                for pred in results.values()], 1))
+
+    plt.plot(results.keys(),
+             fit(results.keys()), 'r')
+
+    plt.show()
+
+
+def output(results):
+    '''Output results.'''
+    print '--------'
+    for key, value in results.iteritems():
+        print str(key) + '\t' + str(np.mean(value))
+
+    slope, _, r_value, _, _ = \
+        linregress(results.keys(),
+                   [np.mean(pred) for pred in results.values()])
+
+    print '--------'
+    print 'Slope:\t%.3f' % slope
+    print 'R2:\t%.3f' % r_value
 
 
 def get_aa_props(all_sequences, scale=(0.1, 0.9)):

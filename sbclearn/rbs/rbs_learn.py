@@ -8,17 +8,14 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=invalid-name
-# pylint: disable=todo
-from collections import defaultdict
 import sys
 
-from sklearn import model_selection
 import scipy.stats
 
-from sbclearn.theanets.theanets_utils import Regressor
-import matplotlib.pyplot as plt
+from sbclearn.theanets import theanets_utils
 import numpy as np
 import pandas as pd
+import sbclearn
 
 
 def get_data(filename):
@@ -32,39 +29,6 @@ def get_data(filename):
     labels = df['id']
 
     return x_data, y_data, labels
-
-
-def learn(x_data, y_data, labels):
-    '''Learn.'''
-    hyperparams = {
-        # 'input_noise': [i / 10.0 for i in range(0, 10)],
-        # 'hidden_noise': [i / 10.0 for i in range(0, 10)],
-        # 'activ_func': 'relu',
-        # 'learning_rate': 0.004,
-        # 'momentum': 0.6,
-        # 'patience': 3,
-        # 'min_improvement': 0.1,
-        # 'validate_every': range(1, 25),
-        # 'batch_size': range(10, 50, 10),
-        # 'hidden_dropout': [i * 0.1 for i in range(0, 10)],
-        # 'input_dropout': [i * 0.1 for i in range(0, 10)]
-    }
-
-    results = defaultdict(list)
-
-    for _ in range(50):
-        x_train, x_test, y_train, y_test, _, labels_test = \
-            model_selection.train_test_split(x_data, y_data, labels,
-                                             test_size=0.1)
-
-        regressor = Regressor(x_train, y_train)
-        regressor.train(hidden_layers=[60, 60], hyperparams=hyperparams)
-        y_preds = regressor.predict(x_test)
-
-        for tup in zip(y_test, y_preds, labels_test):
-            results[(tup[2], tup[0])].append(tup[1])
-
-    return results
 
 
 def _encode_seqs(seqs):
@@ -88,59 +52,12 @@ def _encode_seqs(seqs):
             for seq in stripped_seqs]
 
 
-def _output(results):
-    '''Output results.'''
-    slope, _, r_value, _, _ = \
-        scipy.stats.linregress([key[1] for key in results.keys()],
-                               [np.mean(pred) for pred in results.values()])
-
-    print
-    print
-    print '--------'
-    print 'Slope:\t%.3f' % slope
-    print 'R2:\t%.3f' % r_value
-    print
-
-    res = zip([key[0] for key in results.keys()],
-              [key[1] for key in results.keys()],
-              [np.mean(pred) for pred in results.values()],
-              [np.std(pred) for pred in results.values()])
-
-    res.sort(key=lambda x: x[2], reverse=True)
-
-    for result in res:
-        print '\t'.join([str(r) for r in result])
-
-    _plot(results)
-
-
-def _plot(results):
-    '''Plot results.'''
-    plt.title('Prediction of limonene production from RBS seqs')
-    plt.xlabel('Measured')
-    plt.ylabel('Predicted')
-
-    plt.errorbar([key[1] for key in results.keys()],
-                 [np.mean(pred) for pred in results.values()],
-                 yerr=[np.std(pred) for pred in results.values()],
-                 fmt='o',
-                 color='red')
-
-    fit = np.poly1d(np.polyfit([key[1] for key in results.keys()],
-                               [np.mean(pred)
-                                for pred in results.values()], 1))
-
-    plt.plot([key[1] for key in results.keys()],
-             fit([key[1] for key in results.keys()]), 'r')
-
-    plt.show()
-
-
 def main(args):
     '''main method.'''
-    x_data, y_data, labels = get_data(args[0])
-    results = learn(x_data, y_data, labels)
-    _output(results)
+    x_data, y_data, _ = get_data(args[0])
+    results = theanets_utils.k_fold_cross_valid((x_data, y_data))
+    sbclearn.output(results)
+    sbclearn.plot(results, 'Prediction of limonene production from RBS seqs')
 
 
 if __name__ == '__main__':
