@@ -14,9 +14,10 @@ import json
 import sys
 import urllib
 
+from sklearn.metrics import classification_report, confusion_matrix
+
 from sbclearn.theanets import theanets_utils
 import numpy as np
-import sbclearn
 
 
 def get_data(project_id):
@@ -36,7 +37,11 @@ def main(args):
     '''main method.'''
     results = theanets_utils.k_fold_cross_valid(get_data(args[0]),
                                                 regression=False)
-    sbclearn.plot(results, 'Prediction of ccs')
+
+    results = zip(*results)
+    labels = [False, True]
+    print confusion_matrix(results[0], results[1], labels)
+    print classification_report(results[0], results[1], labels)
 
 
 if __name__ == '__main__':

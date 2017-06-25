@@ -15,7 +15,6 @@ import sys
 from sklearn import preprocessing
 
 from sbclearn.theanets import theanets_utils
-
 import numpy as np
 import pandas as pd
 import sbclearn
