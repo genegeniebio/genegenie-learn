@@ -31,7 +31,7 @@ class TheanetsBase(object):
     def _train(self, num_outputs, valid_size, hidden_layers, hyperparams):
         '''Train the network.'''
         if hidden_layers is None:
-            hidden_layers = [len(self._x_data)]
+            hidden_layers = [len(self._x_data[0])]
 
         if hyperparams is None:
             hyperparams = {}
