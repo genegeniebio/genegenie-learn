@@ -7,14 +7,12 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
-from IN import IPV6CTL_TEMPPLTIME
 import collections
 import itertools
 
-from matplotlib import lines
+from matplotlib import lines, pyplot
 from scipy.stats import linregress
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -47,16 +45,16 @@ NUM_AA_PROPS = len(AA_PROPS['A'])
 
 def plot(results, title, color='b'):
     '''Plot results.'''
-    plt.title(title)
-    plt.xlabel('Measured')
-    plt.ylabel('Predicted')
+    pyplot.title(title)
+    pyplot.xlabel('Measured')
+    pyplot.ylabel('Predicted')
 
-    plt.errorbar(results.keys(),
-                 [np.mean(pred) for pred in results.values()],
-                 yerr=[np.std(pred) for pred in results.values()],
-                 markersize=3,
-                 fmt='o',
-                 color=color)
+    pyplot.errorbar(results.keys(),
+                    [np.mean(pred) for pred in results.values()],
+                    yerr=[np.std(pred) for pred in results.values()],
+                    markersize=3,
+                    fmt='o',
+                    color=color)
 
     slope, _, r_value, _, _ = \
         linregress(results.keys(),
@@ -68,14 +66,14 @@ def plot(results, title, color='b'):
                                [np.mean(pred)
                                 for pred in results.values()], 1))
 
-    ret = plt.plot(results.keys(),
-                   fit(results.keys()),
-                   label=label,
-                   linewidth=1,
-                   color=color)
+    ret = pyplot.plot(results.keys(),
+                      fit(results.keys()),
+                      label=label,
+                      linewidth=1,
+                      color=color)
 
-    plt.legend(handles=[ret[0]])
-    plt.show()
+    pyplot.legend(handles=[ret[0]])
+    pyplot.show()
 
 
 def get_aa_props(all_sequences, scale=(0.1, 0.9)):

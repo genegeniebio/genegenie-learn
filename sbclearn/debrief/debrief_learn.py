@@ -25,7 +25,7 @@ def get_data(project_id):
     response = urllib.urlopen(url)
     data = json.loads(response.read())
 
-    data = [(mutation['b_factors'], [mutation['active']])
+    data = [(mutation['b_factors'], mutation['active'])
             for mutation in data['mutations']
             if 'b_factors' in mutation]
 

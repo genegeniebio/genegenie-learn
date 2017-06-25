@@ -52,8 +52,7 @@ class Classifier(TheanetsBase):
     '''Simple classifier in Theanets.'''
 
     def __init__(self, x_data, y_data):
-        self.__num_outputs = len(set(self._y_data))
-        y_data = np.array([[y] for y in y_data.astype(np.int32)])
+        self.__num_outputs = len(set(y_data))
         super(Classifier, self).__init__(theanets.Classifier, x_data, y_data)
 
     def train(self, valid_size=0.25, hidden_layers=None, hyperparams=None):
@@ -89,7 +88,7 @@ def k_fold_cross_valid((x_data, y_data), regression=True,
                        tests=50, test_size=0.05,
                        hidden_layers=None, hyperparams=None):
     '''k-fold cross validation.'''
-    results = defaultdict(list)
+    results = defaultdict(list) if regression else []
 
     for _ in range(tests):
         data = \
@@ -103,7 +102,10 @@ def k_fold_cross_valid((x_data, y_data), regression=True,
         model.train(hidden_layers=hidden_layers, hyperparams=hyperparams)
 
         for test, pred in zip(data[3], model.predict(data[1])):
-            results[test].append(pred[0])
+            if regression:
+                results[test].append(pred[0])
+            else:
+                results.append((test, pred))
 
     return results
 
