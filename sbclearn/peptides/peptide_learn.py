@@ -52,14 +52,13 @@ def get_data(filename):
 
     x_data = np.array(sbclearn.get_aa_props(df['Sequence'].tolist()))
     y_data = df['obj']
-    labels = df['Sequence']
 
-    return x_data, y_data, labels
+    return x_data, y_data
 
 
 def main(args):
     '''main method.'''
-    x_data, y_data, _ = get_data(args[0])
+    x_data, y_data = get_data(args[0])
     results = theanets_utils.k_fold_cross_valid((x_data, y_data))
     sbclearn.output(results)
     sbclearn.plot(results, 'Prediction of peptide fitness')

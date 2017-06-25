@@ -8,9 +8,8 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=invalid-name
+# pylint: disable=ungrouped-imports
 import sys
-
-import scipy.stats
 
 from sbclearn.theanets import theanets_utils
 import numpy as np
@@ -24,11 +23,7 @@ def get_data(filename):
 
     # TODO: Implement multiple sequence alignment,
     # TODO: deal with duplicate sequences (same seq, different vals)
-    x_data = np.array(_encode_seqs(df['Sequence']))
-    y_data = df['Output']
-    labels = df['id']
-
-    return x_data, y_data, labels
+    return np.array(_encode_seqs(df['Sequence'])), df['Output']
 
 
 def _encode_seqs(seqs):
@@ -54,7 +49,7 @@ def _encode_seqs(seqs):
 
 def main(args):
     '''main method.'''
-    x_data, y_data, _ = get_data(args[0])
+    x_data, y_data = get_data(args[0])
     results = theanets_utils.k_fold_cross_valid((x_data, y_data))
     sbclearn.output(results)
     sbclearn.plot(results, 'Prediction of limonene production from RBS seqs')
