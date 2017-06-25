@@ -7,9 +7,11 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+from IN import IPV6CTL_TEMPPLTIME
 import collections
 import itertools
 
+from matplotlib import lines
 from scipy.stats import linregress
 
 import matplotlib.pyplot as plt
@@ -43,7 +45,7 @@ AA_PROPS = {
 NUM_AA_PROPS = len(AA_PROPS['A'])
 
 
-def plot(results, title):
+def plot(results, title, color='b'):
     '''Plot results.'''
     plt.title(title)
     plt.xlabel('Measured')
@@ -52,32 +54,28 @@ def plot(results, title):
     plt.errorbar(results.keys(),
                  [np.mean(pred) for pred in results.values()],
                  yerr=[np.std(pred) for pred in results.values()],
+                 markersize=3,
                  fmt='o',
-                 color='red')
-
-    fit = np.poly1d(np.polyfit(results.keys(),
-                               [np.mean(pred)
-                                for pred in results.values()], 1))
-
-    plt.plot(results.keys(),
-             fit(results.keys()), 'r')
-
-    plt.show()
-
-
-def output(results):
-    '''Output results.'''
-    print '--------'
-    for key, value in results.iteritems():
-        print str(key) + '\t' + str(np.mean(value))
+                 color=color)
 
     slope, _, r_value, _, _ = \
         linregress(results.keys(),
                    [np.mean(pred) for pred in results.values()])
 
-    print '--------'
-    print 'Slope:\t%.3f' % slope
-    print 'R2:\t%.3f' % r_value
+    label = 'm=%0.3f, r2=%0.3f' % (slope, r_value)
+
+    fit = np.poly1d(np.polyfit(results.keys(),
+                               [np.mean(pred)
+                                for pred in results.values()], 1))
+
+    ret = plt.plot(results.keys(),
+                   fit(results.keys()),
+                   label=label,
+                   linewidth=1,
+                   color=color)
+
+    plt.legend(handles=[ret[0]])
+    plt.show()
 
 
 def get_aa_props(all_sequences, scale=(0.1, 0.9)):

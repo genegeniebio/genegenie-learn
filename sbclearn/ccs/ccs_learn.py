@@ -33,7 +33,6 @@ def main(args):
     '''main method.'''
     x_data, y_data = get_data(args[0])
     results = theanets_utils.k_fold_cross_valid((x_data, y_data))
-    sbclearn.output(results)
     sbclearn.plot(results, 'Prediction of ccs')
 
 
