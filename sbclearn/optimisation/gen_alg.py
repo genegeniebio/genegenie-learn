@@ -81,10 +81,12 @@ class GeneticAlgorithm(object):
 
     def _get_individual(self):
         '''Create a member of the population.'''
-        return {k: self._get_arg(args) for k, args in self.__args.iteritems()}
+        return {key: self._get_arg(key) for key in self.__args}
 
-    def _get_arg(self, args):
+    def _get_arg(self, key):
         '''Gets a random argument.'''
+        args = self.__args[key]
+
         return random.randint(args[0], args[1]) if isinstance(args, tuple) \
             else random.choice(args)
 
@@ -113,7 +115,7 @@ class GeneticAlgorithm(object):
                 key = random.choice(individual.keys())
 
                 if key in self.__args:
-                    individual[key] = self._get_arg(self.__args[key])
+                    individual[key] = self._get_arg(key)
 
         # Ensure uniqueness in population:
         self.__pop = list(numpy.unique(numpy.array(self.__pop)))
