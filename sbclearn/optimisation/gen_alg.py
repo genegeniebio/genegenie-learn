@@ -10,7 +10,6 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=no-member
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-arguments
-import abc
 import random
 
 import numpy
@@ -51,7 +50,6 @@ class Chromosome(object):
 
 class GeneticAlgorithm(object):
     '''Base class to run a genetic algorithm.'''
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, pop_size, args, retain=0.2, random_select=0.05,
                  mutate=0.01, verbose=False):
@@ -61,11 +59,10 @@ class GeneticAlgorithm(object):
         self.__random_select = random_select
         self.__mutate = mutate
         self._verbose = verbose
-        self.__population = []
+        self.__pop = []
 
-        while len(list(numpy.unique(numpy.array(self.__population)))) < \
-                pop_size:
-            self.__population.append(self.__get_individual())
+        while len(list(numpy.unique(numpy.array(self.__pop)))) < pop_size:
+            self.__pop.append(self._get_individual())
 
     def run(self, max_iter=1024, max_tries=1024):
         '''Runs the genetic algorithm.'''
@@ -78,18 +75,22 @@ class GeneticAlgorithm(object):
         raise ValueError('Unable to optimise in ' + str(max_iter) +
                          ' iterations.')
 
-    @abc.abstractmethod
     def _fitness(self, individual):
         '''Determine the fitness of an individual.'''
-        return
+        pass
 
-    def __get_individual(self):
+    def _get_individual(self):
         '''Create a member of the population.'''
-        return {k: _get_arg(args) for k, args in self.__args.iteritems()}
+        return {k: self._get_arg(args) for k, args in self.__args.iteritems()}
+
+    def _get_arg(self, args):
+        '''Gets a random argument.'''
+        return random.randint(args[0], args[1]) if isinstance(args, tuple) \
+            else random.choice(args)
 
     def __evolve(self, max_tries):
         '''Performs one round of evolution.'''
-        graded = sorted([(self._fitness(x), x) for x in self.__population])
+        graded = sorted([(self._fitness(x), x) for x in self.__pop])
 
         if graded[0][0] == 0:
             return graded[0][1]
@@ -102,31 +103,31 @@ class GeneticAlgorithm(object):
 
         # Retain best and randomly add other individuals to promote genetic
         # diversity:
-        self.__population = graded[:retain_length] + \
+        self.__pop = graded[:retain_length] + \
             [ind for ind in graded[retain_length:]
              if self.__random_select > random.random()]
 
         # Mutate some individuals:
-        for individual in self.__population:
+        for individual in self.__pop:
             if self.__mutate > random.random():
                 key = random.choice(individual.keys())
 
                 if key in self.__args:
-                    individual[key] = _get_arg(self.__args[key])
+                    individual[key] = self._get_arg(self.__args[key])
 
         # Ensure uniqueness in population:
-        self.__population = list(numpy.unique(numpy.array(self.__population)))
+        self.__pop = list(numpy.unique(numpy.array(self.__pop)))
 
         self.__breed(max_tries)
 
     def __breed(self, max_tries):
         '''Breeds parents to create children.'''
-        new_population = []
+        new_pop = []
         tries = 0
 
-        while len(new_population) < self.__pop_size:
-            male = random.choice(self.__population)
-            female = random.choice(self.__population)
+        while len(new_pop) < self.__pop_size:
+            male = random.choice(self.__pop)
+            female = random.choice(self.__pop)
 
             if male != female:
                 pos = random.randint(0, len(male))
@@ -138,22 +139,14 @@ class GeneticAlgorithm(object):
                                 for i, k in enumerate(female.keys())
                                 if i >= pos}
 
-                child = dict(male_parts.items() +
-                             female_parts.items())
+                child = dict(male_parts.items() + female_parts.items())
 
-                new_population.append(child)
-                new_population = \
-                    list(numpy.unique(numpy.array(new_population)))
+                new_pop.append(child)
+                new_pop = list(numpy.unique(numpy.array(new_pop)))
 
             tries += 1
 
             if tries == max_tries:
                 raise ValueError('Unable to generate unique population.')
 
-        self.__population = new_population
-
-
-def _get_arg(args):
-    '''Gets a random argument.'''
-    return random.randint(args[0], args[1]) if isinstance(args, tuple) \
-        else random.choice(args)
+        self.__pop = new_pop
