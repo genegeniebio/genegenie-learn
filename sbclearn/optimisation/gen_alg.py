@@ -122,7 +122,7 @@ class GeneticAlgorithm(object):
              if self.__random_select > random.random()]
 
         # Mutate some individuals:
-        for individual in self.__pop:
+        for individual in self.__pop[retain_length:]:
             if self.__mutate > random.random():
                 key = random.choice(individual.keys())
 
@@ -141,20 +141,17 @@ class GeneticAlgorithm(object):
 
     def __breed(self, max_tries):
         '''Breeds parents to create children.'''
-        new_pop = []
         tries = 0
 
-        while len(new_pop) < self.__pop_size:
+        while len(self.__pop) < self.__pop_size:
             male = random.choice(self.__pop)
             female = random.choice(self.__pop)
 
             if male != female:
-                new_pop.append(self._procreate(male, female))
-                new_pop = list(numpy.unique(numpy.array(new_pop)))
+                self.__pop.append(self._procreate(male, female))
+                self.__pop = list(numpy.unique(numpy.array(self.__pop)))
 
             tries += 1
 
             if tries == max_tries:
                 raise ValueError('Unable to generate unique population.')
-
-        self.__pop = new_pop
