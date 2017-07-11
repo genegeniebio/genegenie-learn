@@ -53,12 +53,12 @@ class GeneticAlgorithm(object):
 
     def __init__(self, pop_size, args, retain=0.2, random_select=0.05,
                  mutate=0.01, verbose=False):
+        self._args = args
+        self._verbose = verbose
         self.__pop_size = pop_size
-        self.__args = args
         self.__retain = retain
         self.__random_select = random_select
         self.__mutate = mutate
-        self._verbose = verbose
         self.__pop = []
 
         while len(list(numpy.unique(numpy.array(self.__pop)))) < pop_size:
@@ -67,13 +67,12 @@ class GeneticAlgorithm(object):
     def run(self, max_iter=1024, max_tries=1024):
         '''Runs the genetic algorithm.'''
         for _ in range(max_iter):
-            result = self.__evolve(max_tries)
+            result, optimised = self.__evolve(max_tries)
 
-            if result is not None:
-                return result
+            if optimised:
+                break
 
-        raise ValueError('Unable to optimise in ' + str(max_iter) +
-                         ' iterations.')
+        return result, optimised
 
     def _fitness(self, individual):
         '''Determine the fitness of an individual.'''
@@ -81,21 +80,34 @@ class GeneticAlgorithm(object):
 
     def _get_individual(self):
         '''Create a member of the population.'''
-        return {key: self._get_arg(key) for key in self.__args}
+        return {key: self._get_arg(key) for key in self._args}
 
-    def _get_arg(self, key):
+    def _get_arg(self, key, individual=None):
         '''Gets a random argument.'''
-        args = self.__args[key]
+        args = self._args[key]
 
         return random.randint(args[0], args[1]) if isinstance(args, tuple) \
             else random.choice(args)
+
+    def _procreate(self, male, female):
+        '''Procreate.'''
+        pos = random.randint(0, len(male))
+
+        male_parts = {k: male[k]
+                      for i, k in enumerate(male.keys())
+                      if i < pos}
+        female_parts = {k: female[k]
+                        for i, k in enumerate(female.keys())
+                        if i >= pos}
+
+        return dict(male_parts.items() + female_parts.items())
 
     def __evolve(self, max_tries):
         '''Performs one round of evolution.'''
         graded = sorted([(self._fitness(x), x) for x in self.__pop])
 
         if graded[0][0] == 0:
-            return graded[0][1]
+            return graded[0][1], True
 
         if self._verbose:
             print graded[0]
@@ -114,13 +126,18 @@ class GeneticAlgorithm(object):
             if self.__mutate > random.random():
                 key = random.choice(individual.keys())
 
-                if key in self.__args:
-                    individual[key] = self._get_arg(key)
+                if key in self._args:
+                    individual[key] = self._get_arg(key, individual)
 
         # Ensure uniqueness in population:
         self.__pop = list(numpy.unique(numpy.array(self.__pop)))
 
-        self.__breed(max_tries)
+        try:
+            self.__breed(max_tries)
+        except ValueError:
+            return graded[0], False
+
+        return graded[0], False
 
     def __breed(self, max_tries):
         '''Breeds parents to create children.'''
@@ -132,18 +149,7 @@ class GeneticAlgorithm(object):
             female = random.choice(self.__pop)
 
             if male != female:
-                pos = random.randint(0, len(male))
-
-                male_parts = {k: male[k]
-                              for i, k in enumerate(male.keys())
-                              if i < pos}
-                female_parts = {k: female[k]
-                                for i, k in enumerate(female.keys())
-                                if i >= pos}
-
-                child = dict(male_parts.items() + female_parts.items())
-
-                new_pop.append(child)
+                new_pop.append(self._procreate(male, female))
                 new_pop = list(numpy.unique(numpy.array(new_pop)))
 
             tries += 1

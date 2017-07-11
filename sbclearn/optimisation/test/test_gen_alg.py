@@ -42,16 +42,19 @@ class TestSumGeneticAlgorithm(unittest.TestCase):
                                            for _ in range(10)]))
         target = 321
         genetic_algorithm = SumGeneticAlgorithm(100, args, target)
-        self.assertEqual(sum(genetic_algorithm.run(100000).values()), target)
+        result, optimised = genetic_algorithm.run(100000)
+        self.assertTrue(optimised)
+        self.assertEqual(sum(result.values()), target)
 
-    def test_run_error(self):
+    def test_run_insoluable(self):
         '''Test for run method.'''
         args = dict(enumerate([[5, 10]] + [(random.randint(0, 20),
                                             random.randint(80, 100))
                                            for _ in range(10)]))
         target = 936073
         genetic_algorithm = SumGeneticAlgorithm(100, args, target)
-        self.assertRaises(ValueError, genetic_algorithm.run)
+        _, optimised = genetic_algorithm.run(10)
+        self.assertFalse(optimised)
 
 
 class SumGeneticAlgorithm(gen_alg.GeneticAlgorithm):
