@@ -35,8 +35,13 @@ def get_data(project_id):
 
 def main(args):
     '''main method.'''
-    results = theanets_utils.k_fold_cross_valid(get_data(args[0]),
-                                                regression=False)
+    data = get_data(args[0])
+
+    for row in data[0]:
+        np.nan_to_num(row)
+
+    results = theanets_utils.k_fold_cross_valid(data, regression=False,
+                                                tests=5)
 
     results = zip(*results)
     labels = [False, True]

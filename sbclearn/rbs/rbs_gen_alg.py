@@ -19,7 +19,7 @@ def main(args):
     '''main method.'''
 
     # Get random peptides that match structure patterns from PDB:
-    x_data, y_data, _ = rbs_learn.get_data(args[0])
+    x_data, y_data = rbs_learn.get_data(args[0])
 
     hyperparams = {
         'input_noise': [i / 10.0 for i in range(0, 10)],
