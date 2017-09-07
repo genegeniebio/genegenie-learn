@@ -13,7 +13,8 @@ import unittest
 from sklearn import datasets, metrics, model_selection
 from sklearn.datasets.samples_generator import make_blobs
 
-from sbclearn.theanets import theanets_utils
+from sbclearn.theanets.theanets_utils import Classifier, Regressor
+import numpy as np
 
 
 class TestClassifier(unittest.TestCase):
@@ -24,10 +25,12 @@ class TestClassifier(unittest.TestCase):
         x_data, y_data = make_blobs(n_samples=1000, centers=5, n_features=3,
                                     cluster_std=1.0, random_state=0)
 
+        y_data = y_data.astype(np.int32)
+
         x_train, x_test, y_train, y_test = \
             model_selection.train_test_split(x_data, y_data, test_size=0.2)
 
-        classifier = theanets_utils.Classifier(x_train, y_train)
+        classifier = Classifier(x_train, y_train)
         classifier.train()
         y_pred = classifier.predict(x_test)
 
@@ -45,7 +48,7 @@ class TestRegressor(unittest.TestCase):
             model_selection.train_test_split(dataset.data, dataset.target,
                                              test_size=0.2)
 
-        regressor = theanets_utils.Regressor(x_train, y_train)
+        regressor = Regressor(x_train, y_train)
         regressor.train()
         y_pred = regressor.predict(x_test)
 
