@@ -12,7 +12,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import sys
 
 from sbclearn.rbs import rbs_learn
-from sbclearn.theanets import gen_alg
+from sbclearn import gen_alg
 
 
 def main(args):

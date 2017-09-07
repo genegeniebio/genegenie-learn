@@ -9,8 +9,6 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-arguments
-from collections import defaultdict
-
 from sklearn import model_selection
 import theanets
 
@@ -83,31 +81,6 @@ class Regressor(TheanetsBase):
         '''Predicts test data.'''
         return self._exp.network.predict(x_test)
 
-
-def k_fold_cross_valid((x_data, y_data), regression=True,
-                       tests=50, test_size=0.05,
-                       hidden_layers=None, hyperparams=None):
-    '''k-fold cross validation.'''
-    results = defaultdict(list) if regression else []
-
-    for _ in range(tests):
-        data = \
-            model_selection.train_test_split(x_data, y_data,
-                                             test_size=test_size)
-
-        model = Regressor(data[0], data[2]) \
-            if regression \
-            else Classifier(data[0], data[2])
-
-        model.train(hidden_layers=hidden_layers, hyperparams=hyperparams)
-
-        for test, pred in zip(data[3], model.predict(data[1])):
-            if regression:
-                results[test].append(pred[0])
-            else:
-                results.append((test, pred))
-
-    return results
 
 # hyperparams = {
     # 'input_noise': [i / 10.0 for i in range(0, 10)],

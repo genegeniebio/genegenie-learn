@@ -12,7 +12,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import sys
 
 from sbclearn.peptides import peptide_learn
-from sbclearn.theanets import gen_alg
+from sbclearn import gen_alg
 
 
 def main(args):
