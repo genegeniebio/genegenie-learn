@@ -12,8 +12,8 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=ungrouped-imports
 import sys
 
+from sbclearn import utils
 from sbclearn.ccs import chem
-from sbclearn.theanets import utils
 import numpy as np
 import pandas as pd
 import sbclearn

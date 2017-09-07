@@ -14,7 +14,7 @@ import sys
 
 from sklearn import preprocessing
 
-from sbclearn.theanets import utils
+from sbclearn import utils
 import numpy as np
 import pandas as pd
 import sbclearn
