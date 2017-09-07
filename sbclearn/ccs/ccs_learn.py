@@ -13,7 +13,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import sys
 
 from sbclearn.ccs import chem
-from sbclearn.theanets import theanets_utils
+from sbclearn.theanets import utils
 import numpy as np
 import pandas as pd
 import sbclearn
@@ -32,7 +32,7 @@ def get_data(filename):
 def main(args):
     '''main method.'''
     x_data, y_data = get_data(args[0])
-    results = theanets_utils.k_fold_cross_valid((x_data, y_data))
+    results = utils.k_fold_cross_valid((x_data, y_data))
     sbclearn.plot(results, 'Prediction of ccs')
 
 

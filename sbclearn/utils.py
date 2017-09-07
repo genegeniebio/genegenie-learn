@@ -10,7 +10,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=too-many-arguments
 from collections import defaultdict
 from sklearn import model_selection
-from sbclearn.theanets.theanets_utils import Classifier, Regressor
+from sbclearn.theanets.utils import Classifier, Regressor
 
 
 def k_fold_cross_valid((x_data, y_data),

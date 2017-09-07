@@ -14,7 +14,7 @@ from collections import defaultdict
 from sklearn import metrics, model_selection
 
 from sbclearn.optimisation import gen_alg
-from sbclearn.theanets.theanets_utils import Regressor
+from sbclearn.theanets.utils import Regressor
 import numpy as np
 
 

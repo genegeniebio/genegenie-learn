@@ -16,7 +16,7 @@ import urllib
 
 from sklearn.metrics import classification_report, confusion_matrix
 
-from sbclearn.theanets import theanets_utils
+from sbclearn.theanets import utils
 import numpy as np
 
 
@@ -40,7 +40,7 @@ def main(args):
     for row in data[0]:
         np.nan_to_num(row)
 
-    results = theanets_utils.k_fold_cross_valid(data, regression=False,
+    results = utils.k_fold_cross_valid(data, regression=False,
                                                 tests=5)
 
     results = zip(*results)

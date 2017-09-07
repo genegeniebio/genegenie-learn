@@ -11,7 +11,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=ungrouped-imports
 import sys
 
-from sbclearn.theanets import theanets_utils
+from sbclearn.theanets import utils
 import numpy as np
 import pandas as pd
 import sbclearn
@@ -50,7 +50,7 @@ def _encode_seqs(seqs):
 def main(args):
     '''main method.'''
     x_data, y_data = get_data(args[0])
-    results = theanets_utils.k_fold_cross_valid((x_data, y_data))
+    results = utils.k_fold_cross_valid((x_data, y_data))
     sbclearn.plot(results, 'Prediction of limonene production from RBS seqs')
 
 
