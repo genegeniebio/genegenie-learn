@@ -11,8 +11,8 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=too-many-arguments
 import sys
 
-from sbclearn.peptides import peptide_learn
 from sbclearn import gen_alg
+from sbclearn.peptides import peptide_learn
 
 
 def main(args):

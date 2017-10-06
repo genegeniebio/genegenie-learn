@@ -8,9 +8,9 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=no-member
-from rdkit import Chem, DataStructs
-from rdkit.Chem import AllChem
 import numpy
+
+from rdkit import Chem, DataStructs
 
 
 def get_fingerprint(smiles, radius=2):
