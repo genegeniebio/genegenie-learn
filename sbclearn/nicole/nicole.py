@@ -11,8 +11,9 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import os
 import sys
 
-import pandas as pd
 from synbiochem.utils import seq_utils, xl_converter
+
+import pandas as pd
 
 
 def get_data(xl_filename):
@@ -48,13 +49,11 @@ def analyse(df):
 
     df['dif_align_seq'] = char_df.apply(''.join, axis=1)
 
-    return df
-
 
 def main(args):
     '''main method.'''
     df = get_data(args[0])
-    df = analyse(df)
+    analyse(df)
     df.to_csv('out.csv')
 
 

@@ -14,7 +14,7 @@ from keras.optimizers import SGD
 
 
 class Classifier(object):
-    '''Simple classifier in Theanets.'''
+    '''Simple classifier in keras.'''
 
     def __init__(self, x_data, y_data):
         self.__num_outputs = len(set([tuple(val) for val in y_data]))
@@ -44,8 +44,9 @@ class Classifier(object):
         # Dense(64) is a fully-connected layer with 64 hidden units.
         # in the first layer, you must specify the expected input data shape:
         # here, 20-dimensional vectors.
-        model.add(Dense(64, activation='relu',
-                        input_dim=self.__x_data.shape[1]))
+        model.add(Dense(64,
+                        input_dim=self.__x_data.shape[1],
+                        activation='relu'))
         model.add(Dropout(0.5))
         model.add(Dense(64, activation='relu'))
         model.add(Dropout(0.5))
