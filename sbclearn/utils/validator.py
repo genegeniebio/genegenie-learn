@@ -11,6 +11,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 from collections import defaultdict
 
 from sklearn import model_selection
+from synbiochem.utils import seq_utils
 
 from sbclearn.theanets.utils import Classifier, Regressor
 
