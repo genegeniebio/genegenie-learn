@@ -51,7 +51,7 @@ class OneHotTransformer(BaseEstimator, TransformerMixin):
 
     def __init__(self, nucl=True):
         alphabet = seq_utils.NUCLEOTIDES if nucl \
-            else seq_utils.AA_CODES.values()
+            else seq_utils.AA_CODES.values() + ['-']
         self.__alphabet = sorted(alphabet)
 
         # Define a mapping of chars to integers:
