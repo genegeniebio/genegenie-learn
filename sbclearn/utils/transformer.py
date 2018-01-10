@@ -57,11 +57,11 @@ class OneHotTransformer(BaseEstimator, TransformerMixin):
         # Define a mapping of chars to integers:
         self.__char_to_int = {c: i for i, c in enumerate(self.__alphabet)}
 
-    def fit(self, X, y=None):
+    def fit(self, *unused):
         '''fit.'''
         return self
 
-    def transform(self, X, y=None):
+    def transform(self, X, *unused):
         '''transform.'''
         return self.__one_hot_encode(X)
 
@@ -95,11 +95,11 @@ class AminoAcidTransformer(BaseEstimator, TransformerMixin):
         self.__mean_values = [(scale[1] - scale[0]) / 2.0] * \
             len(self.__scaled_aa_props['A'])
 
-    def fit(self, X, y=None):
+    def fit(self, *unused):
         '''fit.'''
         return self
 
-    def transform(self, X, y=None):
+    def transform(self, X, *unused):
         '''transform.'''
         return self.__aa_encode(X)
 
