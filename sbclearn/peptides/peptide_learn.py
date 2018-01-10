@@ -14,9 +14,9 @@ import sys
 
 from sklearn import preprocessing
 
-from sbclearn import utils
 import numpy as np
 import pandas as pd
+from sbclearn import utils
 import sbclearn
 
 

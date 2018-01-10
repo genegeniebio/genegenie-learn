@@ -13,6 +13,7 @@ import collections
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from synbiochem.utils import seq_utils
+
 import numpy as np
 
 

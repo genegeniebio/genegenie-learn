@@ -13,8 +13,8 @@ import unittest
 from sklearn import datasets, metrics, model_selection
 from sklearn.datasets.samples_generator import make_blobs
 
-from sbclearn.theanets.utils import Classifier, Regressor
 import numpy as np
+from sbclearn.theanets.utils import Classifier, Regressor
 
 
 class TestClassifier(unittest.TestCase):

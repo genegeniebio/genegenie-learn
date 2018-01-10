@@ -16,8 +16,8 @@ import urllib
 
 from sklearn.metrics import classification_report, confusion_matrix
 
-from sbclearn import utils
 import numpy as np
+from sbclearn import utils
 
 
 def get_data(project_id):

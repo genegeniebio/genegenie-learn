@@ -15,10 +15,10 @@ from keras.utils import to_categorical
 from sklearn import metrics, model_selection
 from sklearn.metrics import confusion_matrix
 
-from sbclearn.keras.utils import Classifier
 import numpy as np
 import pandas as pd
 import sbclearn
+from sbclearn.keras.utils import Classifier
 
 
 def get_data(filename):

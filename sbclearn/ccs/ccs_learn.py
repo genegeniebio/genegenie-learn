@@ -12,11 +12,11 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=ungrouped-imports
 import sys
 
-from sbclearn import utils
-from sbclearn.ccs import chem
 import numpy as np
 import pandas as pd
+from sbclearn import utils
 import sbclearn
+from sbclearn.ccs import chem
 
 
 def get_data(filename):
