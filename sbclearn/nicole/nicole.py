@@ -65,31 +65,11 @@ def align(df, sources=None):
     return df
 
 
-def get_one_hot(df):
-    '''Get one-hot encoding.'''
-    trnsfrmr = transformer.OneHotTransformer(nucl=False)
-    return trnsfrmr.transform(df.values)
-
-
-def get_aa_props(df):
-    '''Get amino acid property encoding.'''
-    trnsfrmr = transformer.AminoAcidTransformer()
-    return trnsfrmr.transform(df.values)
-
-
-def estimate(X, y, cv):
-    '''Estimate.'''
-    print 'LinearRegression:\t' + \
-        str(cross_valid_score(LinearRegression(), X, y, cv))
-    print 'DecisionTreeRegressor:\t' + \
-        str(cross_valid_score(DecisionTreeRegressor(), X, y, cv))
-    print 'RandomForestRegressor:\t' + \
-        str(cross_valid_score(RandomForestRegressor(), X, y, cv))
-
-
 def cross_valid_score(estimator, X, y, cv, verbose=False):
     '''Perform cross validation.'''
-    scores = cross_val_score(estimator, X, y, scoring='neg_mean_squared_error',
+    scores = cross_val_score(estimator,
+                             X, y,
+                             scoring='neg_mean_squared_error',
                              cv=cv,
                              verbose=verbose)
     scores = np.sqrt(-scores)
@@ -106,13 +86,25 @@ def main(args):
     learn_df = df.loc[:, ['dif_align_seq', 'geraniol']]
     learn_df.columns = ['seq', 'activity']
 
+    transformers = [transformer.OneHotTransformer(nucl=False),
+                    transformer.AminoAcidTransformer()]
+
+    estimators = [LinearRegression(),
+                  DecisionTreeRegressor(),
+                  RandomForestRegressor()]
+
     cv = 10
 
-    encoded = get_one_hot(learn_df)
-    estimate(encoded[:, 2:], encoded[:, 1], cv)
+    for trnsfrmr in transformers:
+        encoded = trnsfrmr.transform(learn_df.values)
 
-    encoded = get_aa_props(learn_df)
-    estimate(encoded[:, 2:], encoded[:, 1], cv)
+        X = encoded[:, 2:]
+        y = encoded[:, 1]
+
+        for estimator in estimators:
+            print '\t'.join([trnsfrmr.__class__.__name__,
+                             estimator.__class__.__name__,
+                             str(cross_valid_score(estimator, X, y, cv))])
 
 
 if __name__ == '__main__':
