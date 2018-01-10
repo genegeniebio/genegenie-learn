@@ -14,6 +14,7 @@ import sys
 from sklearn.ensemble.forest import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_val_score
+from sklearn.svm import SVR
 from sklearn.tree.tree import DecisionTreeRegressor
 from synbiochem.utils import seq_utils, xl_converter
 
@@ -91,7 +92,8 @@ def main(args):
 
     estimators = [LinearRegression(),
                   DecisionTreeRegressor(),
-                  RandomForestRegressor()]
+                  RandomForestRegressor(),
+                  SVR(kernel='poly')]
 
     cv = 10
 
