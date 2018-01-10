@@ -11,8 +11,13 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import os
 import sys
 
+from sklearn.ensemble.forest import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import cross_val_score
+from sklearn.tree.tree import DecisionTreeRegressor
 from synbiochem.utils import seq_utils, xl_converter
 
+import numpy as np
 import pandas as pd
 from sbclearn.utils import transformer
 
@@ -60,11 +65,36 @@ def align(df, sources=None):
     return df
 
 
-def analyse_one_hot(df):
-    '''Analyse with one-hot encoding.'''
-    one_hot_trans = transformer.OneHotTransformer(nucl=False)
-    dataset = one_hot_trans.transform(df.values)
-    print dataset
+def get_one_hot(df):
+    '''Get one-hot encoding.'''
+    trnsfrmr = transformer.OneHotTransformer(nucl=False)
+    return trnsfrmr.transform(df.values)
+
+
+def get_aa_props(df):
+    '''Get amino acid property encoding.'''
+    trnsfrmr = transformer.AminoAcidTransformer()
+    return trnsfrmr.transform(df.values)
+
+
+def estimate(X, y, cv):
+    '''Estimate.'''
+    print 'LinearRegression:\t' + \
+        str(cross_valid_score(LinearRegression(), X, y, cv))
+    print 'DecisionTreeRegressor:\t' + \
+        str(cross_valid_score(DecisionTreeRegressor(), X, y, cv))
+    print 'RandomForestRegressor:\t' + \
+        str(cross_valid_score(RandomForestRegressor(), X, y, cv))
+
+
+def cross_valid_score(estimator, X, y, cv, verbose=False):
+    '''Perform cross validation.'''
+    scores = cross_val_score(estimator, X, y, scoring='neg_mean_squared_error',
+                             cv=cv,
+                             verbose=verbose)
+    scores = np.sqrt(-scores)
+
+    return scores.mean(), scores.std()
 
 
 def main(args):
@@ -75,7 +105,14 @@ def main(args):
 
     learn_df = df.loc[:, ['dif_align_seq', 'geraniol']]
     learn_df.columns = ['seq', 'activity']
-    analyse_one_hot(learn_df)
+
+    cv = 10
+
+    encoded = get_one_hot(learn_df)
+    estimate(encoded[:, 2:], encoded[:, 1], cv)
+
+    encoded = get_aa_props(learn_df)
+    estimate(encoded[:, 2:], encoded[:, 1], cv)
 
 
 if __name__ == '__main__':
