@@ -14,6 +14,7 @@ import sys
 
 from sklearn.ensemble.forest import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import cross_val_score
 from sklearn.svm import SVR
 from sklearn.tree.tree import DecisionTreeRegressor
@@ -89,6 +90,28 @@ def main(args):
         print '\t'.join([trnsfrmr.__class__.__name__,
                          estimator.__class__.__name__,
                          str((mean, std))])
+
+    param_grid = {'min_samples_split': [2, 10, 20],
+                  'max_depth': [None, 2, 5, 10],
+                  'min_samples_leaf': [1, 5, 10],
+                  'max_leaf_nodes': [10, 20, 50, 100]
+                  }
+
+    estimator = DecisionTreeRegressor()
+    grid_search = GridSearchCV(estimator,
+                               param_grid,
+                               scoring='neg_mean_squared_error',
+                               cv=10,
+                               verbose=True)
+
+    grid_search.fit(encoded[:, 2:], encoded[:, 1])
+
+    print grid_search.best_params_
+
+    res = grid_search.cv_results_
+
+    for mean, params in zip(res['mean_test_score'], res['params']):
+        print (np.sqrt(-mean), params)
 
 
 if __name__ == '__main__':
