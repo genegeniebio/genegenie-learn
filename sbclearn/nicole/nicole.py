@@ -16,6 +16,7 @@ from sklearn.ensemble.forest import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import cross_val_score
+from sklearn.preprocessing.data import StandardScaler
 from sklearn.svm import SVR
 from sklearn.tree.tree import DecisionTreeRegressor
 from synbiochem.utils import xl_converter
@@ -68,17 +69,39 @@ def cross_valid_score(estimator, X, y, cv, verbose=False):
     return scores.mean(), scores.std()
 
 
+def do_grid_search(estimator, param_grid, X, y):
+    '''Perform grid search.'''
+    grid_search = GridSearchCV(estimator,
+                               param_grid,
+                               scoring='neg_mean_squared_error',
+                               cv=10,
+                               verbose=True)
+
+    grid_search.fit(X, y)
+
+    res = grid_search.cv_results_
+
+    for mean, params in sorted(zip(res['mean_test_score'], res['params']),
+                               reverse=True):
+        print (np.sqrt(-mean), params)
+
+    print
+
+
 def main(args):
     '''main method.'''
+    print SVR(kernel='poly')
+
     data = get_data(args[0], args[1:] if len(args) > 1 else None)
 
     transformers = [transformer.OneHotTransformer(nucl=False),
                     transformer.AminoAcidTransformer()]
 
-    estimators = [LinearRegression(),
-                  DecisionTreeRegressor(),
-                  RandomForestRegressor(),
-                  SVR(kernel='poly')]
+    estimators = [
+        LinearRegression(),
+        DecisionTreeRegressor(),
+        RandomForestRegressor(),
+        SVR(kernel='poly')]
 
     for trnsfrmr, estimator in itertools.product(transformers, estimators):
         encoded = trnsfrmr.transform(data)
@@ -91,27 +114,30 @@ def main(args):
                          estimator.__class__.__name__,
                          str((mean, std))])
 
+    print
+
+    X, y = encoded[:, 2:], encoded[:, 1]
+    X = StandardScaler().fit_transform(X)
+
+    # Grid search random forest:
     param_grid = {'min_samples_split': [2, 10, 20],
                   'max_depth': [None, 2, 5, 10],
                   'min_samples_leaf': [1, 5, 10],
                   'max_leaf_nodes': [10, 20, 50, 100]
                   }
 
-    estimator = DecisionTreeRegressor()
-    grid_search = GridSearchCV(estimator,
-                               param_grid,
-                               scoring='neg_mean_squared_error',
-                               cv=10,
-                               verbose=True)
+    do_grid_search(RandomForestRegressor(), param_grid, X, y)
 
-    grid_search.fit(encoded[:, 2:], encoded[:, 1])
+    param_grid = {'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
+                  'degree': range(1, 4),
+                  'epsilon': [1 * 10**n for n in range(-1, 1)],
+                  'gamma': ['auto'] + [1 * 10**n for n in range(-1, 1)],
+                  'coef0': [1 * 10**n for n in range(-4, 1)],
+                  'tol': [1 * 10**n for n in range(-4, 1)],
+                  'C': [1 * 10**n for n in range(-1, 1)]
+                  }
 
-    print grid_search.best_params_
-
-    res = grid_search.cv_results_
-
-    for mean, params in zip(res['mean_test_score'], res['params']):
-        print (np.sqrt(-mean), params)
+    do_grid_search(SVR(kernel='poly'), param_grid, X, y)
 
 
 if __name__ == '__main__':
