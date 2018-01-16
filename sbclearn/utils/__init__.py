@@ -10,40 +10,34 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import collections
 import itertools
 
-from matplotlib import lines, pyplot
+# from matplotlib import lines
 from scipy.stats import linregress
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 
-def plot(results, title, color='b'):
+def plot(y_test, y_pred, title='Measured vs. predicted'):
     '''Plot results.'''
-    pyplot.title(title)
-    pyplot.xlabel('Measured')
-    pyplot.ylabel('Predicted')
+    plt.title(title)
+    plt.xlabel('Measured')
+    plt.ylabel('Predicted')
 
-    pyplot.errorbar(results.keys(),
-                    [np.mean(pred) for pred in results.values()],
-                    yerr=[np.std(pred) for pred in results.values()],
-                    markersize=3,
-                    fmt='o',
-                    color=color)
+    y_test = [y for y in y_test]
+    y_pred = [y for y in y_pred]
 
-    slope, _, r_value, _, _ = \
-        linregress(results.keys(),
-                   [np.mean(pred) for pred in results.values()])
-
+    slope, _, r_value, _, _ = linregress(y_test, y_pred)
     label = 'm=%0.3f, r2=%0.3f' % (slope, r_value)
 
-    fit = np.poly1d(np.polyfit(results.keys(),
-                               [np.mean(pred)
-                                for pred in results.values()], 1))
+    plt.scatter(y_test, y_pred)
 
-    ret = pyplot.plot(results.keys(),
-                      fit(results.keys()),
-                      label=label,
-                      linewidth=1,
-                      color=color)
+    fit = np.poly1d(np.polyfit(y_test, y_pred, 1))
 
-    pyplot.legend(handles=[ret[0]])
-    pyplot.show()
+    ret = plt.plot(y_test,
+                   fit(y_test),
+                   label=label,
+                   linewidth=1,
+                   )
+
+    plt.legend(handles=[ret[0]])
+    plt.show()

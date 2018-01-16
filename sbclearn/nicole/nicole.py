@@ -8,14 +8,16 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=invalid-name
+# pylint: disable=too-many-arguments
 import itertools
 import os
 import sys
 
+from sklearn.ensemble import ExtraTreesRegressor, GradientBoostingRegressor
 from sklearn.ensemble.forest import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, train_test_split, \
+    GridSearchCV
 from sklearn.preprocessing.data import StandardScaler
 from sklearn.svm import SVR
 from sklearn.tree.tree import DecisionTreeRegressor
@@ -23,9 +25,12 @@ from synbiochem.utils import xl_converter
 
 import numpy as np
 import pandas as pd
-from sbclearn.utils import aligner, transformer
+from sbclearn.utils import aligner, plot, transformer
 
 
+# from sklearn.ensemble.forest import RandomForestRegressor
+# from sklearn.linear_model import LinearRegression
+# from sklearn.tree.tree import DecisionTreeRegressor
 def get_data(xl_filename, sources=None):
     '''Get data.'''
     df = _get_raw_data(xl_filename)
@@ -69,13 +74,16 @@ def cross_valid_score(estimator, X, y, cv, verbose=False):
     return scores.mean(), scores.std()
 
 
-def do_grid_search(estimator, param_grid, X, y):
+def do_grid_search(estimator, X, y, cv, param_grid=None, verbose=False):
     '''Perform grid search.'''
+    if not param_grid:
+        param_grid = {}
+
     grid_search = GridSearchCV(estimator,
                                param_grid,
                                scoring='neg_mean_squared_error',
-                               cv=10,
-                               verbose=True)
+                               cv=cv,
+                               verbose=verbose)
 
     grid_search.fit(X, y)
 
@@ -88,27 +96,29 @@ def do_grid_search(estimator, param_grid, X, y):
     print
 
 
-def main(args):
-    '''main method.'''
-    print SVR(kernel='poly')
-
-    data = get_data(args[0], args[1:] if len(args) > 1 else None)
-
-    transformers = [transformer.OneHotTransformer(nucl=False),
-                    transformer.AminoAcidTransformer()]
+def _hi_level_investigation(data):
+    '''Perform high-level investigation.'''
+    transformers = [
+        transformer.OneHotTransformer(nucl=False),
+        transformer.AminoAcidTransformer()]
 
     estimators = [
         LinearRegression(),
         DecisionTreeRegressor(),
         RandomForestRegressor(),
-        SVR(kernel='poly')]
+        ExtraTreesRegressor(),
+        GradientBoostingRegressor(),
+        SVR(kernel='poly')
+    ]
+
+    cv = 10
 
     for trnsfrmr, estimator in itertools.product(transformers, estimators):
         encoded = trnsfrmr.transform(data)
+        X, y = encoded[:, 2:], encoded[:, 1]
+        X = StandardScaler().fit_transform(X)
 
-        mean, std = cross_valid_score(estimator,
-                                      encoded[:, 2:], encoded[:, 1],
-                                      cv=10)
+        mean, std = cross_valid_score(estimator, X, y, cv=cv)
 
         print '\t'.join([trnsfrmr.__class__.__name__,
                          estimator.__class__.__name__,
@@ -116,18 +126,21 @@ def main(args):
 
     print
 
-    X, y = encoded[:, 2:], encoded[:, 1]
-    X = StandardScaler().fit_transform(X)
 
-    # Grid search random forest:
-    param_grid = {'min_samples_split': [2, 10, 20],
-                  'max_depth': [None, 2, 5, 10],
-                  'min_samples_leaf': [1, 5, 10],
-                  'max_leaf_nodes': [10, 20, 50, 100]
+def _grid_search_extra_trees(X, y, cv):
+    '''Grid search with ExtraTreesRegressor.'''
+    param_grid = {'min_samples_split': [2, 5, 10],
+                  'max_depth': [None, 1, 2, 5],
+                  'min_samples_leaf': [2, 5, 10],
+                  'max_leaf_nodes': [None, 2, 5],
+                  'n_estimators': [10, 20, 50]
                   }
 
-    do_grid_search(RandomForestRegressor(), param_grid, X, y)
+    do_grid_search(ExtraTreesRegressor(), X, y, cv, param_grid)
 
+
+def _grid_search_svr(X, y, cv):
+    '''Grid search with SVR.'''
     param_grid = {'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
                   'degree': range(1, 4),
                   'epsilon': [1 * 10**n for n in range(-1, 1)],
@@ -137,7 +150,37 @@ def main(args):
                   'C': [1 * 10**n for n in range(-1, 1)]
                   }
 
-    do_grid_search(SVR(kernel='poly'), param_grid, X, y)
+    do_grid_search(SVR(kernel='poly'), X, y, cv, param_grid)
+
+
+def _predict(estimator, X, y):
+    '''Predict.'''
+    y_tests = []
+    y_preds = []
+
+    for _ in range(0, 100):
+        X_train, X_test, y_train, y_test = train_test_split(X, y,
+                                                            test_size=0.1)
+        estimator.fit(X_train, y_train)
+        y_tests.extend(y_test)
+        y_preds.extend(estimator.predict(X_test))
+
+    plot(y_tests, y_preds)
+
+
+def main(args):
+    '''main method.'''
+    data = get_data(args[0], args[1:] if len(args) > 1 else None)
+    _hi_level_investigation(data)
+
+    encoded = transformer.AminoAcidTransformer().transform(data)
+    X, y = encoded[:, 2:], encoded[:, 1]
+    X = StandardScaler().fit_transform(X)
+
+    # _grid_search_extra_trees(X, y, cv)
+    # _grid_search_svr(X, y, cv)
+
+    _predict(ExtraTreesRegressor(), X, y)
 
 
 if __name__ == '__main__':
