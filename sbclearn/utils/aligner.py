@@ -13,11 +13,8 @@ from synbiochem.utils import seq_utils
 import pandas as pd
 
 
-def align(df, sources=None):
+def align(df):
     '''Align.'''
-    # Filter rows:
-    if sources:
-        df = df.loc[df['source'].isin(sources)]
 
     # Perform Clustal Omega alignment:
     df['align_seq'] = \

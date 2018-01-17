@@ -34,7 +34,12 @@ from sbclearn.utils import aligner, plot, transformer
 def get_data(xl_filename, sources=None):
     '''Get data.'''
     df = _get_raw_data(xl_filename)
-    df = aligner.align(df, sources)
+
+    # Filter rows:
+    if sources:
+        df = df.loc[df['source'].isin(sources)]
+
+    df = aligner.align(df)
     df.to_csv('out.csv')
 
     learn_df = df.loc[:, ['dif_align_seq', 'geraniol']]
