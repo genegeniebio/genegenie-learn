@@ -60,26 +60,29 @@ def feed_forward(neural_network, input_vector):
 
 def backpropagate(network, input_vector, target):
     '''backpropogate.'''
-    hidden_outputs, outputs = feed_forward(network, input_vector)
+    outputs = feed_forward(network, input_vector)
+
+    layer = len(network) - 1
 
     # the output * (1 - output) is from the derivative of sigmoid
     deltas = [output * (1 - output) * (output - target[i])
-              for i, output in enumerate(outputs)]
+              for i, output in enumerate(outputs[layer])]
 
     # adjust weights for output layer (network[-1])
-    for i, output_neuron in enumerate(network[-1]):
-        for j, hidden_output in enumerate(hidden_outputs + [1]):
-            output_neuron[j] -= deltas[i] * hidden_output
+    for i, neuron in enumerate(network[-1]):
+        for j, output in enumerate(outputs[layer - 1] + [1]):
+            neuron[j] -= deltas[i] * output
+
+    layer -= 1
 
     # back-propagate errors to hidden layer
-    deltas = [hidden_output * (1 - hidden_output) *
-              dot(deltas, [n[i] for n in network[-1]])
-              for i, hidden_output in enumerate(hidden_outputs)]
+    deltas = [output * (1 - output) * dot(deltas, [n[i] for n in network[-1]])
+              for i, output in enumerate(outputs[layer])]
 
     # adjust weights for hidden layer (network[0])
-    for i, hidden_neuron in enumerate(network[0]):
+    for i, neuron in enumerate(network[0]):
         for j, inpt in enumerate(input_vector + [1]):
-            hidden_neuron[j] -= deltas[i] * inpt
+            neuron[j] -= deltas[i] * inpt
 
 
 def patch(x, y, hatch, color):
