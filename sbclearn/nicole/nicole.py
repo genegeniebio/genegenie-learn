@@ -158,14 +158,14 @@ def _grid_search_svr(X, y, cv):
     do_grid_search(SVR(kernel='poly'), X, y, cv, param_grid)
 
 
-def _predict(estimator, X, y):
+def _predict(estimator, X, y, tests=25, test_size=0.05):
     '''Predict.'''
     y_tests = []
     y_preds = []
 
-    for _ in range(0, 100):
-        X_train, X_test, y_train, y_test = train_test_split(X, y,
-                                                            test_size=0.1)
+    for _ in range(0, tests):
+        X_train, X_test, y_train, y_test = \
+            train_test_split(X, y, test_size=test_size)
         estimator.fit(X_train, y_train)
         y_tests.extend(y_test)
         y_preds.extend(estimator.predict(X_test))
@@ -185,7 +185,7 @@ def main(args):
     # _grid_search_extra_trees(X, y, cv)
     # _grid_search_svr(X, y, cv)
 
-    _predict(ExtraTreesRegressor(), X, y)
+    _predict(GradientBoostingRegressor(), X, y)
 
 
 if __name__ == '__main__':
