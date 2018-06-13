@@ -69,18 +69,6 @@ def _get_raw_data(xl_filename):
     return df.drop_duplicates()
 
 
-def cross_valid_score(estimator, X, y, cv, verbose=False):
-    '''Perform cross validation.'''
-    scores = cross_val_score(estimator,
-                             X, y,
-                             scoring='neg_mean_squared_error',
-                             cv=cv,
-                             verbose=verbose)
-    scores = np.sqrt(-scores)
-
-    return scores.mean(), scores.std()
-
-
 def do_grid_search(estimator, X, y, cv, param_grid=None, verbose=False):
     '''Perform grid search.'''
     if not param_grid:
@@ -125,25 +113,31 @@ def _hi_level_investigation(data):
         X, y = encoded[:, 2:], encoded[:, 1]
         X = StandardScaler().fit_transform(X)
 
-        mean, std = cross_valid_score(estimator, X, y, cv=cv)
+        scores = cross_val_score(estimator,
+                                 X, y,
+                                 scoring='neg_mean_squared_error',
+                                 cv=cv,
+                                 verbose=False)
+        scores = np.sqrt(-scores)
 
         print '\t'.join([trnsfrmr.__class__.__name__,
                          estimator.__class__.__name__,
-                         str((mean, std))])
+                         str((scores.mean(), scores.std()))])
 
     print
 
 
-def _grid_search_extra_trees(X, y, cv):
+def _grid_search_random_forest(X, y, cv):
     '''Grid search with ExtraTreesRegressor.'''
-    param_grid = {'min_samples_split': [2, 5, 10],
-                  'max_depth': [None, 1, 2, 5],
-                  'min_samples_leaf': [2, 5, 10],
-                  'max_leaf_nodes': [None, 2, 5],
-                  'n_estimators': [10, 20, 50]
-                  }
+    param_grid = {  # 'min_samples_split': [2, 5, 10],
+        'max_depth': [None, 1, 2, 5],
+        # 'min_samples_leaf': [2, 5, 10],
+        'max_leaf_nodes': [None, 2, 5],
+        'n_estimators': [10, 20, 50],
+        # 'min_weight_fraction_leaf': [0, 0.1, 0.2]
+    }
 
-    do_grid_search(ExtraTreesRegressor(), X, y, cv, param_grid)
+    do_grid_search(RandomForestRegressor(), X, y, cv, param_grid)
 
 
 def _grid_search_svr(X, y, cv):
@@ -187,7 +181,9 @@ def main(args):
     # _grid_search_extra_trees(X, y, cv)
     # _grid_search_svr(X, y, cv)
 
-    _predict(GradientBoostingRegressor(), X, y)
+    _grid_search_random_forest(X, y, cv=10)
+
+    _predict(RandomForestRegressor(), X, y)
 
 
 if __name__ == '__main__':
