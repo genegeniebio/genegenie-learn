@@ -12,9 +12,9 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import collections
 
 from sklearn.base import BaseEstimator, TransformerMixin
-from synbiochem.utils import seq_utils
 
 import numpy as np
+from synbiochem.utils import seq_utils
 
 
 SEQ_IDX = 0
@@ -51,7 +51,7 @@ class OneHotTransformer(BaseEstimator, TransformerMixin):
 
     def __init__(self, nucl=True):
         alphabet = seq_utils.NUCLEOTIDES if nucl \
-            else seq_utils.AA_CODES.values() + ['-']
+            else seq_utils.AA_CODES.values() + ['-', 'X']
         self.__alphabet = sorted(alphabet)
 
         # Define a mapping of chars to integers:

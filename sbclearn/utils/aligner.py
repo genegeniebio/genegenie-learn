@@ -8,9 +8,8 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=invalid-name
-from synbiochem.utils import seq_utils
-
 import pandas as pd
+from synbiochem.utils import seq_utils
 
 
 def align(df):
@@ -21,6 +20,7 @@ def align(df):
         pd.Series(seq_utils.do_clustal(df.to_dict()['seq']))
 
     # Strip out positions with identical residues:
+    df = df[df['align_seq'].notnull()]
     aas = [list(seq) for seq in df['align_seq']]
 
     char_df = pd.DataFrame(aas,

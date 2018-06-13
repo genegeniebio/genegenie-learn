@@ -21,11 +21,11 @@ from sklearn.model_selection import cross_val_score, train_test_split, \
 from sklearn.preprocessing.data import StandardScaler
 from sklearn.svm import SVR
 from sklearn.tree.tree import DecisionTreeRegressor
-from synbiochem.utils import xl_converter
 
 import numpy as np
 import pandas as pd
 from sbclearn.utils import aligner, plot, transformer
+from synbiochem.utils import xl_converter
 
 
 # from sklearn.ensemble.forest import RandomForestRegressor
@@ -40,10 +40,11 @@ def get_data(xl_filename, sources=None):
         df = df.loc[df['source'].isin(sources)]
 
     df = aligner.align(df)
-    df.to_csv('out.csv')
+    df.to_csv('aligned.csv')
 
     learn_df = df.loc[:, ['dif_align_seq', 'geraniol']]
     learn_df.columns = ['seq', 'activity']
+    learn_df.to_csv('learn.csv')
 
     return learn_df.values
 
@@ -61,6 +62,7 @@ def _get_raw_data(xl_filename):
 
     df = pd.concat(dfs)
     df.set_index('id', inplace=True)
+    df = df[df['seq'].notnull()]
     df['seq'] = df['seq'].apply(lambda x: x.replace('*', ''))
     df['mutations'] = df['mutations'].apply(lambda x: '' if x == '[]' else x)
 
