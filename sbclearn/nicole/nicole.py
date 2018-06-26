@@ -21,11 +21,11 @@ from sklearn.model_selection import cross_val_score, train_test_split, \
 from sklearn.preprocessing.data import StandardScaler
 from sklearn.svm import SVR
 from sklearn.tree.tree import DecisionTreeRegressor
+from synbiochem.utils import xl_converter
 
 import numpy as np
 import pandas as pd
 from sbclearn.utils import aligner, plot, transformer
-from synbiochem.utils import xl_converter
 
 
 # from sklearn.ensemble.forest import RandomForestRegressor
@@ -40,11 +40,16 @@ def get_data(xl_filename, sources=None):
         df = df.loc[df['source'].isin(sources)]
 
     df = aligner.align(df)
+    dif_align = df['dif_align_seq']
+    df = df.select_dtypes(include=[np.number]).apply(
+        lambda x: x / df.sum(axis=1))
+    df['dif_align_seq'] = dif_align
     df.to_csv('aligned.csv')
 
     learn_df = df.loc[:, ['dif_align_seq', 'geraniol']]
     learn_df.columns = ['seq', 'activity']
     learn_df.to_csv('learn.csv')
+    learn_df.dropna(inplace=True)
 
     return learn_df.values
 
