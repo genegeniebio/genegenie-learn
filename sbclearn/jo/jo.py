@@ -11,10 +11,10 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=no-member
 import sys
 
-from keras.utils import to_categorical
 from sklearn import metrics, model_selection
 from sklearn.metrics import confusion_matrix
 
+from keras.utils import to_categorical
 import numpy as np
 import pandas as pd
 import sbclearn

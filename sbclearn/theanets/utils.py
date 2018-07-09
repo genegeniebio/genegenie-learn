@@ -10,9 +10,9 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-arguments
 from sklearn import model_selection
-import theanets
 
 import numpy as np
+import theanets
 
 
 class TheanetsBase(object):

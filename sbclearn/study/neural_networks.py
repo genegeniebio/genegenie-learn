@@ -13,6 +13,7 @@ from __future__ import division
 
 import math
 import random
+
 import matplotlib
 from numpy import dot
 

@@ -10,13 +10,13 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import collections
 import itertools
 
-# from matplotlib import lines
 from scipy.stats import linregress
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 
+# from matplotlib import lines
 def plot(y_test, y_pred, title='Measured vs. predicted'):
     '''Plot results.'''
     plt.title(title)

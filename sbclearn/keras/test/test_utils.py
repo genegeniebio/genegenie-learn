@@ -11,15 +11,15 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=no-member
 import unittest
 
-from keras.layers import Dense
-from keras.models import Sequential
-from keras.utils import to_categorical
-from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn import metrics, model_selection
 from sklearn.datasets.samples_generator import make_blobs
 from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
 
+from keras.layers import Dense
+from keras.models import Sequential
+from keras.utils import to_categorical
+from keras.wrappers.scikit_learn import KerasRegressor
 import numpy as np
 import pandas as pd
 from sbclearn.keras.utils import Classifier
