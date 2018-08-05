@@ -12,7 +12,7 @@ from collections import defaultdict
 
 from sklearn import model_selection
 
-from sbclearn.theanets.utils import Classifier, Regressor
+from sbclearn.keras.utils import Classifier, Regressor
 
 
 def k_fold_cross_valid((x_data, y_data),
