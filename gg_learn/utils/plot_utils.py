@@ -30,7 +30,9 @@ def plot_stats(stats, filename, param):
 
     # subplots:
     _subplot_stats(fig.add_subplot(121), stats, 'loss')
-    _subplot_stats(fig.add_subplot(122), stats, param)
+
+    if param:
+        _subplot_stats(fig.add_subplot(122), stats, param)
 
     plt.tight_layout()
     plt.savefig(filename, bbox_inches='tight')
@@ -81,4 +83,5 @@ def _subplot(y_true, y_pred, color, alpha, label):
     plt.plot(model.predict(y_pred.reshape(-1, 1)), y_pred,
              color=color,
              alpha=alpha,
-             label=label + ': %.2f ' % coeff_corr(y_true, y_pred))
+             label=label +
+             ': %.2f ' % coeff_corr(y_true, y_pred.reshape(len(y_pred))))

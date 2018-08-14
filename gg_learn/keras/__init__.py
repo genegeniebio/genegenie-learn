@@ -8,15 +8,17 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=too-many-arguments
-from keras import backend
-from keras import layers, models
+import math
+
+from keras import backend, layers, models
 from keras.layers import Dense, Dropout
 from keras.models import Sequential
 from keras.optimizers import SGD
 from scipy import stats
-from sklearn.model_selection import KFold
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import KFold, train_test_split
 
-from sbclearn.utils.plot_utils import plot_stats, plot_linreg
+from gg_learn.utils.plot_utils import plot_stats, plot_linreg
 
 
 def coeff_determ(y_true, y_pred):
@@ -74,6 +76,53 @@ def get_regress_model(input_shape,
     model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
 
     return model
+
+
+def regress(X, y, batch_size=200, epochs=25):
+    '''Classify.'''
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
+
+    model = models.Sequential()
+
+    model.add(layers.Embedding(input_dim=21,
+                               output_dim=5,
+                               input_length=X_train.shape[1]))
+
+    for idx, layer in enumerate([32, 32]):
+        model.add(layers.LSTM(layer,
+                              return_sequences=idx != len([32, 32]) - 1))
+        model.add(layers.Dropout(0.2))
+
+    model.add(layers.Dense(units=1))
+
+    model.compile(loss='mean_squared_error', optimizer='adam')
+
+    # print(model.summary())
+
+    stats = model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs,
+                      validation_split=0.1)
+
+    plot_stats(stats.history, 'stats.svg', None)
+
+    plot_linreg(model.predict(X_train), model.predict(X_test),
+                y_train, y_test, 0)
+
+    return math.sqrt(mean_squared_error(y_test, model.predict(X_test)))
+
+
+def classify(X, y, batch_size=200, epochs=25):
+    '''Classify.'''
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
+
+    model = get_classify_model(X_train.shape[1])
+    # print(model.summary())
+
+    stats = model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs,
+                      validation_split=0.1)
+
+    plot_stats(stats.history, 'stats.svg', 'acc')
+
+    return model.evaluate(X_test, y_test, verbose=0)
 
 
 def k_folds_nn(x, y, param, n_splits=3, batch_size=None, epochs=500):

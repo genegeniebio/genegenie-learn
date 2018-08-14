@@ -21,14 +21,24 @@ from sklearn.preprocessing.data import StandardScaler
 from sklearn.svm import SVR
 from sklearn.tree.tree import DecisionTreeRegressor
 
+from gg_learn.keras import regress
 from gg_learn.nicole import get_aligned_data, get_data
 from gg_learn.utils import transformer
+from gg_learn.utils.biochem_utils import get_ordinal_seq
 import numpy as np
 
 
 # from sklearn.ensemble.forest import RandomForestRegressor
 # from sklearn.linear_model import LinearRegression
 # from sklearn.tree.tree import DecisionTreeRegressor
+def analyse(df):
+    '''Analyse.'''
+    X = get_ordinal_seq(df['seq'])
+    y = df['geraniol'].fillna(0)
+
+    score = regress(X, y, batch_size=20)
+    print('Score: %.2f RMSE' % (score))
+
 
 def analyse_aligned(df):
     '''Analyse aligned data.'''
@@ -149,7 +159,8 @@ def _predict(estimator, X, y, tests=25, test_size=0.05):
 def main(args):
     '''main method.'''
     df = get_data(args[0], args[1:] if len(args) > 1 else None)
-    analyse_aligned(df)
+    analyse(df)
+    # analyse_aligned(df)
 
 
 if __name__ == '__main__':

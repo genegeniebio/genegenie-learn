@@ -56,4 +56,5 @@ def get_data(xl_filename, sources):
         lambda x: x / df.sum(axis=1))
 
     df = pd.concat([text_df, num_df], axis=1, sort=False)
+    df = df.sample(frac=1)
     return df.drop_duplicates()
