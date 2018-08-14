@@ -16,9 +16,8 @@ import numpy as np
 import pandas as pd
 
 
-def get_aligned_data(xl_filename, sources=None):
+def get_aligned_data(df):
     '''Get data.'''
-    df = _get_raw_data(xl_filename, sources)
     df = aligner.align(df)
     dif_align = df['dif_align_seq']
     df = df.select_dtypes(include=[np.number]).apply(
@@ -34,7 +33,7 @@ def get_aligned_data(xl_filename, sources=None):
     return learn_df.values
 
 
-def _get_raw_data(xl_filename, sources):
+def get_data(xl_filename, sources):
     '''Get raw data.'''
     dir_name = xl_converter.convert(xl_filename)
     dfs = []

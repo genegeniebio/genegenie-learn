@@ -21,7 +21,7 @@ from sklearn.preprocessing.data import StandardScaler
 from sklearn.svm import SVR
 from sklearn.tree.tree import DecisionTreeRegressor
 
-from gg_learn.nicole import get_aligned_data
+from gg_learn.nicole import get_aligned_data, get_data
 from gg_learn.utils import transformer
 import numpy as np
 
@@ -29,6 +29,25 @@ import numpy as np
 # from sklearn.ensemble.forest import RandomForestRegressor
 # from sklearn.linear_model import LinearRegression
 # from sklearn.tree.tree import DecisionTreeRegressor
+
+def analyse_aligned(df):
+    '''Analyse aligned data.'''
+    aligned_data = get_aligned_data(df)
+
+    _hi_level_investigation(aligned_data)
+
+    encoded = transformer.AminoAcidTransformer().transform(aligned_data)
+    X, y = encoded[:, 2:], encoded[:, 1]
+    X = StandardScaler().fit_transform(X)
+
+    # _grid_search_extra_trees(X, y, cv)
+    # _grid_search_svr(X, y, cv)
+
+    _grid_search_random_forest(X, y, cv=10)
+
+    _predict(RandomForestRegressor(), X, y)
+
+
 def do_grid_search(estimator, X, y, cv, param_grid=None, verbose=False):
     '''Perform grid search.'''
     if not param_grid:
@@ -129,21 +148,8 @@ def _predict(estimator, X, y, tests=25, test_size=0.05):
 
 def main(args):
     '''main method.'''
-    aligned_data = get_aligned_data(args[0], args[1:]
-                                    if len(args) > 1 else None)
-
-    _hi_level_investigation(aligned_data)
-
-    encoded = transformer.AminoAcidTransformer().transform(aligned_data)
-    X, y = encoded[:, 2:], encoded[:, 1]
-    X = StandardScaler().fit_transform(X)
-
-    # _grid_search_extra_trees(X, y, cv)
-    # _grid_search_svr(X, y, cv)
-
-    _grid_search_random_forest(X, y, cv=10)
-
-    _predict(RandomForestRegressor(), X, y)
+    df = get_data(args[0], args[1:] if len(args) > 1 else None)
+    analyse_aligned(df)
 
 
 if __name__ == '__main__':
