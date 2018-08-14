@@ -11,8 +11,8 @@ import math
 
 from sklearn.linear_model import LinearRegression
 
+from gg_learn.utils import coeff_corr
 import matplotlib.pyplot as plt
-from sbclearn.utils import coeff_corr
 
 
 def plot_histogram(data, xlabel, ylabel, title):

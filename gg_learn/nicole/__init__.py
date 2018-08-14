@@ -11,19 +11,14 @@ import os
 
 from synbiochem.utils import xl_converter
 
+from gg_learn.utils import aligner
 import numpy as np
 import pandas as pd
-from sbclearn.utils import aligner
 
 
-def get_data(xl_filename, sources=None):
+def get_aligned_data(xl_filename, sources=None):
     '''Get data.'''
-    df = _get_raw_data(xl_filename)
-
-    # Filter rows:
-    if sources:
-        df = df.loc[df['source'].isin(sources)]
-
+    df = _get_raw_data(xl_filename, sources)
     df = aligner.align(df)
     dif_align = df['dif_align_seq']
     df = df.select_dtypes(include=[np.number]).apply(
@@ -39,7 +34,7 @@ def get_data(xl_filename, sources=None):
     return learn_df.values
 
 
-def _get_raw_data(xl_filename):
+def _get_raw_data(xl_filename, sources):
     '''Get raw data.'''
     dir_name = xl_converter.convert(xl_filename)
     dfs = []
@@ -50,10 +45,14 @@ def _get_raw_data(xl_filename):
             df['source'] = filename[:-4]
             dfs.append(df)
 
-    df = pd.concat(dfs)
+    df = pd.concat(dfs, sort=True)
     df.set_index('id', inplace=True)
     df = df[df['seq'].notnull()]
     df['seq'] = df['seq'].apply(lambda x: x.replace('*', ''))
     df['mutations'] = df['mutations'].apply(lambda x: '' if x == '[]' else x)
+
+    # Filter rows:
+    if sources:
+        df = df.loc[df['source'].isin(sources)]
 
     return df.drop_duplicates()

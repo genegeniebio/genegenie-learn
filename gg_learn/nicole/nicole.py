@@ -21,10 +21,9 @@ from sklearn.preprocessing.data import StandardScaler
 from sklearn.svm import SVR
 from sklearn.tree.tree import DecisionTreeRegressor
 
+from gg_learn.nicole import get_aligned_data
+from gg_learn.utils import transformer
 import numpy as np
-from sbclearn.nicole import get_data
-from sbclearn.utils import transformer
-from sbclearn.utils.plot_utils import plot_linreg
 
 
 # from sklearn.ensemble.forest import RandomForestRegressor
@@ -127,15 +126,15 @@ def _predict(estimator, X, y, tests=25, test_size=0.05):
         y_tests.extend(y_test)
         y_preds.extend(estimator.predict(X_test))
 
-    plot_linreg(y_tests, y_preds)
-
 
 def main(args):
     '''main method.'''
-    data = get_data(args[0], args[1:] if len(args) > 1 else None)
-    _hi_level_investigation(data)
+    aligned_data = get_aligned_data(args[0], args[1:]
+                                    if len(args) > 1 else None)
 
-    encoded = transformer.AminoAcidTransformer().transform(data)
+    _hi_level_investigation(aligned_data)
+
+    encoded = transformer.AminoAcidTransformer().transform(aligned_data)
     X, y = encoded[:, 2:], encoded[:, 1]
     X = StandardScaler().fit_transform(X)
 
