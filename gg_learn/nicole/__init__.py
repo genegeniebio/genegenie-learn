@@ -19,10 +19,6 @@ import pandas as pd
 def get_aligned_data(df):
     '''Get data.'''
     df = aligner.align(df)
-    dif_align = df['dif_align_seq']
-    df = df.select_dtypes(include=[np.number]).apply(
-        lambda x: x / df.sum(axis=1))
-    df['dif_align_seq'] = dif_align
     df.to_csv('aligned.csv')
 
     learn_df = df.loc[:, ['dif_align_seq', 'geraniol']]
@@ -54,4 +50,10 @@ def get_data(xl_filename, sources):
     if sources:
         df = df.loc[df['source'].isin(sources)]
 
+    # Return relative chemical production:
+    text_df = df.select_dtypes(exclude=[np.number])
+    num_df = df.select_dtypes(include=[np.number]).apply(
+        lambda x: x / df.sum(axis=1))
+
+    df = pd.concat([text_df, num_df], axis=1, sort=False)
     return df.drop_duplicates()
