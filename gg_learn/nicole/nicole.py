@@ -36,7 +36,7 @@ def analyse(df):
     X = get_ordinal_seq(df['seq'])
     y = df['geraniol'].fillna(0)
 
-    score = regress(X, y, batch_size=20)
+    score = regress(X, y, batch_size=10, epochs=50)
     print('Score: %.2f RMSE' % (score))
 
 

@@ -78,29 +78,34 @@ def get_regress_model(input_shape,
     return model
 
 
-def regress(X, y, batch_size=200, epochs=25):
+def regress(X, y, lyrs=[64, 64, 64], dropout=0.5,
+            optimizer='adam',
+            input_dim=21, output_dim=5,
+            batch_size=200, epochs=25,
+            test_size=0.1, validation_split=0.33):
     '''Classify.'''
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
+    X_train, X_test, y_train, y_test = \
+        train_test_split(X, y, test_size=test_size)
 
     model = models.Sequential()
 
-    model.add(layers.Embedding(input_dim=21,
-                               output_dim=5,
+    model.add(layers.Embedding(input_dim=input_dim,
+                               output_dim=output_dim,
                                input_length=X_train.shape[1]))
 
-    for idx, layer in enumerate([32, 32]):
+    for idx, layer in enumerate(lyrs):
         model.add(layers.LSTM(layer,
-                              return_sequences=idx != len([32, 32]) - 1))
-        model.add(layers.Dropout(0.2))
+                              return_sequences=idx != len(lyrs) - 1))
+        model.add(layers.Dropout(dropout))
 
     model.add(layers.Dense(units=1))
 
-    model.compile(loss='mean_squared_error', optimizer='adam')
+    model.compile(loss='mean_squared_error', optimizer=optimizer)
 
     # print(model.summary())
 
     stats = model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs,
-                      validation_split=0.1)
+                      validation_split=validation_split)
 
     plot_stats(stats.history, 'stats.svg', None)
 
