@@ -12,6 +12,8 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import itertools
 import sys
 
+from keras.optimizers import Adam
+
 from sklearn.ensemble import ExtraTreesRegressor, GradientBoostingRegressor
 from sklearn.ensemble.forest import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
@@ -36,7 +38,7 @@ def analyse(df):
     X = get_ordinal_seq(df['seq'])
     y = df['geraniol'].fillna(0)
 
-    score = regress(X, y, batch_size=10, epochs=50)
+    score = regress(X, y, optimizer=Adam(lr=0.00025), batch_size=10, epochs=50)
     print('Score: %.2f RMSE' % (score))
 
 
