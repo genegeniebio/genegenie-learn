@@ -12,6 +12,7 @@ import math
 
 from keras import backend, layers, models
 from keras.layers import Dense, Dropout
+from keras.layers.wrappers import Bidirectional
 from keras.models import Sequential
 from keras.optimizers import SGD
 from scipy import stats
@@ -28,13 +29,13 @@ def coeff_determ(y_true, y_pred):
     return 1 - ss_res / (ss_tot + backend.epsilon())
 
 
-def get_classify_model(input_length,
-                       output_dim=5,
-                       layer_units=[32, 32],
-                       dropout=0.2,
-                       loss='binary_crossentropy',
-                       optimizer='adam',
-                       metrics=['accuracy']):
+def get_classify_model_lstm(input_length,
+                            output_dim=5,
+                            layer_units=[32, 32],
+                            dropout=0.2,
+                            loss='binary_crossentropy',
+                            optimizer='adam',
+                            metrics=['accuracy']):
     '''Get model.'''
     model = models.Sequential()
 
@@ -43,8 +44,14 @@ def get_classify_model(input_length,
                                input_length=input_length))
 
     for idx, layer in enumerate(layer_units):
+        # Bidirectional "reads" sequence in both directions.
+        # Seems to perform poorly - padding issue?
+        # model.add(Bidirectional(
+        #    layers.LSTM(layer, return_sequences=idx != len(layer_units) - 1)))
+
         model.add(layers.LSTM(layer,
                               return_sequences=idx != len(layer_units) - 1))
+
         model.add(layers.Dropout(dropout))
 
     model.add(layers.Dense(1, activation='sigmoid'))
@@ -78,11 +85,11 @@ def get_regress_model(input_shape,
     return model
 
 
-def regress(X, y, lyrs=[64, 64, 64], dropout=0.5,
-            optimizer='adam',
-            input_dim=21, output_dim=5,
-            batch_size=200, epochs=25,
-            test_size=0.1, validation_split=0.33):
+def regress_lstm(X, y, lyrs=[64, 64, 64], dropout=0.5,
+                 optimizer='adam',
+                 input_dim=21, output_dim=5,
+                 batch_size=200, epochs=25,
+                 test_size=0.1, validation_split=0.33):
     '''Classify.'''
     X_train, X_test, y_train, y_test = \
         train_test_split(X, y, test_size=test_size)
@@ -115,11 +122,11 @@ def regress(X, y, lyrs=[64, 64, 64], dropout=0.5,
     return math.sqrt(mean_squared_error(y_test, model.predict(X_test)))
 
 
-def classify(X, y, batch_size=200, epochs=25):
-    '''Classify.'''
+def classify_lstm(X, y, batch_size=200, epochs=25):
+    '''Classify with lstm.'''
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
 
-    model = get_classify_model(X_train.shape[1])
+    model = get_classify_model_lstm(X_train.shape[1])
     # print(model.summary())
 
     stats = model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs,
@@ -127,7 +134,9 @@ def classify(X, y, batch_size=200, epochs=25):
 
     plot_stats(stats.history, 'stats.svg', 'acc')
 
-    return model.evaluate(X_test, y_test, verbose=0)
+    return (model.evaluate(X_test, y_test, verbose=0),
+            y_test,
+            model.predict_classes(X_test))
 
 
 def k_folds_nn(x, y, param, n_splits=3, batch_size=None, epochs=500):

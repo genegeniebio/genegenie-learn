@@ -8,7 +8,9 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=invalid-name
-from gg_learn.keras import classify
+from sklearn.metrics import classification_report, confusion_matrix
+
+from gg_learn.keras import classify_lstm
 from gg_learn.utils.biochem_utils import fasta_to_df, get_ordinal_seq
 import pandas as pd
 
@@ -34,9 +36,14 @@ def main():
     X = get_ordinal_seq(df['seq'])
     y = df['thermostability']
 
-    scores = classify(X, y)
+    scores, y_true, y_pred = classify_lstm(X, y)
 
-    print('Accuracy: %.2f%%' % (scores[1] * 100))
+    print('\nAccuracy: %.2f%%' % (scores[1] * 100))
+
+    print('\nConfusion Matrix')
+    print(confusion_matrix(y_true, y_pred))
+    print('\nClassification Report')
+    print(classification_report(y_true, y_pred, target_names=['l', 'h']))
 
 
 if __name__ == '__main__':
