@@ -12,9 +12,9 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 from rdkit.Chem import MolFromSmiles
 
+from gg_learn.keras import k_folds_nn
+from gg_learn.utils.biochem_utils import get_tensor_chem
 import pandas as pd
-from sbclearn.keras import k_folds_nn
-from sbclearn.utils.biochem_utils import get_tensor_chem
 
 
 def get_data(path):
