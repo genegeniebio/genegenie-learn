@@ -42,11 +42,17 @@ def get_onehot_seq(seqs):
 def get_ordinal_seq(seqs):
     '''Encode an amino acid sequence as a tensor by concatenating ordinal
     encoding up to desired depth.'''
+    return np.array([_aa_index(seq) for seq in seqs])
+
+
+def get_ordinal_seq_padded(seqs):
+    '''Encode an amino acid sequence as a tensor by concatenating ordinal
+    encoding up to desired depth.'''
     # Left pad seqs with spaces to ensure consistent length,
     # and return as indexes:
     max_seq_len = max([len(seq) for seq in seqs])
     seqs = [seq.rjust(max_seq_len) for seq in seqs]
-    return np.array([_aa_index(seq) for seq in seqs])
+    return get_ordinal_seq(seqs)
 
 
 def get_tensor_chem(mols, fingerprint_size, depth):

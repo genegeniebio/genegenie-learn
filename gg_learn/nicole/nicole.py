@@ -26,19 +26,35 @@ from sklearn.tree.tree import DecisionTreeRegressor
 from gg_learn.keras import regress_lstm
 from gg_learn.nicole import get_aligned_data, get_data
 from gg_learn.utils import transformer
-from gg_learn.utils.biochem_utils import get_ordinal_seq
+from gg_learn.utils.biochem_utils import get_ordinal_seq, \
+    get_ordinal_seq_padded
 import numpy as np
 
 
 # from sklearn.ensemble.forest import RandomForestRegressor
 # from sklearn.linear_model import LinearRegression
 # from sklearn.tree.tree import DecisionTreeRegressor
-def analyse(df):
+def analyse_padded(df, lyrs=[64, 64, 64], dropout=0.5,
+                   lr=0.00025, batch_size=10, epochs=50):
+    '''Analyse.'''
+    X = get_ordinal_seq_padded(df['seq'])
+    y = df['geraniol'].fillna(0)
+
+    score = regress_lstm(X, y,
+                         lyrs=lyrs, dropout=dropout,
+                         optimizer=Adam(lr=lr),
+                         batch_size=batch_size, epochs=epochs)
+
+    print('Score: %.2f RMSE' % (score))
+
+
+def analyse_unpadded(df):
     '''Analyse.'''
     X = get_ordinal_seq(df['seq'])
     y = df['geraniol'].fillna(0)
 
-    score = regress_lstm(X, y, optimizer=Adam(lr=0.00025), batch_size=10, epochs=50)
+    score = regress_lstm(X, y, optimizer=Adam(lr=0.00025),
+                         batch_size=1, epochs=50)
     print('Score: %.2f RMSE' % (score))
 
 
@@ -162,7 +178,7 @@ def main(args):
     '''main method.'''
     df = get_data(args[0], args[1:] if len(args) > 1 else None)
     df.to_csv('geraniol.csv')
-    analyse(df)
+    analyse_padded(df, batch_size=25, epochs=3)
     # analyse_aligned(df)
 
 
