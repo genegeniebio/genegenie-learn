@@ -96,7 +96,7 @@ def patch(x, y, hatch, color):
 def show_weights(network, neuron_idx):
     '''show_wrights.'''
     weights = network[0][neuron_idx]
-    abs_weights = map(abs, weights)
+    abs_weights = list(map(abs, weights))
 
     grid = [abs_weights[row:(row + 5)]  # turn the weights into a 5x5 grid
             for row in range(0, 25, 5)]  # [weights[0:5], ..., weights[20:25]]
@@ -191,7 +191,7 @@ def main():
              ....1
              11111''']
 
-    inputs = map(make_digit, raw_digits)
+    inputs = list(map(make_digit, raw_digits))
 
     targets = [[1 if i == j else 0 for i in range(10)]
                for j in range(10)]
@@ -210,24 +210,24 @@ def main():
 
     for i, inpt in enumerate(inputs):
         outputs = predict(network, inpt)
-        print i, [round(p, 2) for p in outputs]
+        print(i, [round(p, 2) for p in outputs])
 
-    print
-    print [round(x, 2) for x in predict(network,
+    print()
+    print([round(x, 2) for x in predict(network,
                                         [0, 1, 1, 1, 0,  # .@@@.
                                          0, 0, 0, 1, 1,  # ...@@
                                          0, 0, 1, 1, 0,  # ..@@.
                                          0, 0, 0, 1, 1,  # ...@@
                                          0, 1, 1, 1, 0]  # .@@@.
-                                        )]
-    print
-    print [round(x, 2) for x in predict(network,
+                                        )])
+    print()
+    print([round(x, 2) for x in predict(network,
                                         [0, 1, 1, 1, 0,  # .@@@.
                                          1, 0, 0, 1, 1,  # @..@@
                                          0, 1, 1, 1, 0,  # .@@@.
                                          1, 0, 0, 1, 1,  # @..@@
                                          0, 1, 1, 1, 0]  # .@@@.
-                                        )]
+                                        )])
 
 
 if __name__ == '__main__':

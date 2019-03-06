@@ -8,6 +8,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 @author:  neilswainston
 '''
 # pylint: disable=invalid-name
+# pylint: disable=wrong-import-order
 from sklearn.metrics import classification_report, confusion_matrix
 
 from gg_learn.keras import classify_lstm

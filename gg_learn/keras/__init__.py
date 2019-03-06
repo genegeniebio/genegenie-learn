@@ -7,7 +7,9 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+# pylint: disable=invalid-name
 # pylint: disable=too-many-arguments
+# pylint: disable=too-many-locals
 import math
 
 from keras import backend, layers, models
@@ -15,7 +17,6 @@ from keras.layers import Dense, Dropout
 from keras.layers.wrappers import Bidirectional
 from keras.models import Sequential
 from keras.optimizers import SGD
-from scipy import stats
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import KFold, train_test_split
 
@@ -31,17 +32,23 @@ def coeff_determ(y_true, y_pred):
 
 def get_classify_model_lstm(input_length,
                             output_dim=5,
-                            layer_units=[32, 32],
+                            layer_units=None,
                             dropout=0.2,
                             loss='binary_crossentropy',
                             optimizer='adam',
-                            metrics=['accuracy']):
+                            metrics=None):
     '''Get model.'''
     model = models.Sequential()
 
     model.add(layers.Embedding(input_dim=21,
                                output_dim=output_dim,
                                input_length=input_length))
+
+    if layer_units is None:
+        layer_units = [32, 32]
+
+    if metrics is None:
+        metrics = ['accuracy']
 
     for idx, layer in enumerate(layer_units):
         # Bidirectional "reads" sequence in both directions.
@@ -64,13 +71,19 @@ def get_classify_model_lstm(input_length,
 
 
 def get_regress_model(input_shape,
-                      layer_units=[20, 7, 5],
+                      layer_units=None,
                       activation='relu',
                       loss='mean_squared_error',
                       optimizer='adam',
-                      metrics=[coeff_determ]):
+                      metrics=None):
     '''Get model.'''
     model = models.Sequential()
+
+    if layer_units is None:
+        layer_units = [20, 7, 5]
+
+    if metrics is None:
+        metrics = [coeff_determ]
 
     for units in layer_units:
         model.add(layers.Dense(units=units,
@@ -85,7 +98,7 @@ def get_regress_model(input_shape,
     return model
 
 
-def regress_lstm(X, y, lyrs=[64, 64, 64], dropout=0.5,
+def regress_lstm(X, y, layer_units=None, dropout=0.5,
                  optimizer='adam',
                  input_dim=21, output_dim=5,
                  batch_size=200, epochs=25,
@@ -100,9 +113,12 @@ def regress_lstm(X, y, lyrs=[64, 64, 64], dropout=0.5,
                                output_dim=output_dim,
                                input_length=X_train.shape[1]))
 
-    for idx, layer in enumerate(lyrs):
+    if layer_units is None:
+        layer_units = [64, 64, 64]
+
+    for idx, layer in enumerate(layer_units):
         model.add(layers.LSTM(layer,
-                              return_sequences=idx != len(lyrs) - 1))
+                              return_sequences=idx != len(layer_units) - 1))
         model.add(layers.Dropout(dropout))
 
     model.add(layers.Dense(units=1))
@@ -164,11 +180,11 @@ def k_folds_nn(x, y, param, n_splits=3, batch_size=None, epochs=500):
         plot_linreg(x_train_predict, x_test_predict, y_train, y_test, i)
 
 
-class Classifier(object):
+class Classifier():
     '''Simple classifier in keras.'''
 
     def __init__(self, x_data, y_data):
-        self.__num_outputs = len(set([tuple(val) for val in y_data]))
+        self.__num_outputs = len({tuple(val) for val in y_data})
         self.__x_data = x_data
         self.__y_data = y_data
         self.__model = self.__get_model()

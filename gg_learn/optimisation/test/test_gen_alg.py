@@ -13,7 +13,7 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 import random
 import unittest
 
-from sbclearn.optimisation import gen_alg
+from gg_learn.optimisation import gen_alg
 
 
 class TestChromosome(unittest.TestCase):

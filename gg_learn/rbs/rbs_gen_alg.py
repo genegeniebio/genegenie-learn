@@ -11,8 +11,8 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=too-many-arguments
 import sys
 
-from sbclearn import gen_alg
-from sbclearn.rbs import rbs_learn
+from gg_learn import gen_alg
+from gg_learn.rbs import rbs_learn
 
 
 def main(args):

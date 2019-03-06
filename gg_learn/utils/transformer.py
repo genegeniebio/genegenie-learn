@@ -122,7 +122,7 @@ def _scale(scale):
     scaled = collections.defaultdict(list)
 
     for i in range(NUM_AA_PROPS):
-        props = {key: value[i] for key, value in AA_PROPS.iteritems()}
+        props = {key: value[i] for key, value in AA_PROPS.items()}
         min_val, max_val = min(props.values()), max(props.values())
 
         for key, value in props.iteritems():

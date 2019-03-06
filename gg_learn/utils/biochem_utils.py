@@ -11,11 +11,11 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=too-many-arguments
 from Bio import SeqIO
 from Bio.PDB.Polypeptide import aa1, d1_to_index
-from rdkit.Chem import AllChem
 from sklearn.preprocessing import OneHotEncoder
 
 import numpy as np
 import pandas as pd
+from rdkit.Chem import AllChem
 
 
 def fasta_to_df(filename):

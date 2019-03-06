@@ -17,7 +17,7 @@ import random
 import numpy
 
 
-class Chromosome(object):
+class Chromosome():
     '''Class to represent a chromosome.'''
 
     def __init__(self, chromosome, len_chromosome, mutation_rate=0.01):
@@ -50,7 +50,7 @@ class Chromosome(object):
                       'b') + '\t' + str(self.__chromosome)
 
 
-class GeneticAlgorithm(object):
+class GeneticAlgorithm():
     '''Base class to run a genetic algorithm.'''
 
     def __init__(self, pop_size, args, retain=0.2, random_select=0.05,
@@ -112,7 +112,7 @@ class GeneticAlgorithm(object):
             return graded[0][1], True
 
         if self._verbose:
-            print graded[0]
+            print(graded[0])
 
         graded = [x[1] for x in graded]
         retain_length = int(self.__pop_size * self.__retain)

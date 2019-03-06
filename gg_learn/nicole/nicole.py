@@ -9,11 +9,11 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 # pylint: disable=invalid-name
 # pylint: disable=too-many-arguments
+# pylint: disable=wrong-import-order
 import itertools
 import sys
 
 from keras.optimizers import Adam
-
 from sklearn.ensemble import ExtraTreesRegressor, GradientBoostingRegressor
 from sklearn.ensemble.forest import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
@@ -34,14 +34,17 @@ import numpy as np
 # from sklearn.ensemble.forest import RandomForestRegressor
 # from sklearn.linear_model import LinearRegression
 # from sklearn.tree.tree import DecisionTreeRegressor
-def analyse_padded(df, lyrs=[64, 64, 64], dropout=0.5,
+def analyse_padded(df, layer_units=None, dropout=0.5,
                    lr=0.00025, batch_size=10, epochs=50):
     '''Analyse.'''
     X = get_ordinal_seq_padded(df['seq'])
     y = df['geraniol'].fillna(0)
 
+    if layer_units is None:
+        layer_units = [64, 64, 64]
+
     score = regress_lstm(X, y,
-                         lyrs=lyrs, dropout=dropout,
+                         layer_units=layer_units, dropout=dropout,
                          optimizer=Adam(lr=lr),
                          batch_size=batch_size, epochs=epochs)
 
@@ -93,9 +96,9 @@ def do_grid_search(estimator, X, y, cv, param_grid=None, verbose=False):
 
     for mean, params in sorted(zip(res['mean_test_score'], res['params']),
                                reverse=True):
-        print (np.sqrt(-mean), params)
+        print(np.sqrt(-mean), params)
 
-    print
+    print()
 
 
 def _hi_level_investigation(data):
@@ -127,11 +130,11 @@ def _hi_level_investigation(data):
                                  verbose=False)
         scores = np.sqrt(-scores)
 
-        print '\t'.join([trnsfrmr.__class__.__name__,
+        print('\t'.join([trnsfrmr.__class__.__name__,
                          estimator.__class__.__name__,
-                         str((scores.mean(), scores.std()))])
+                         str((scores.mean(), scores.std()))]))
 
-    print
+    print()
 
 
 def _grid_search_random_forest(X, y, cv):

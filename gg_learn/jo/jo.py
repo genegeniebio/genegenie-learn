@@ -9,16 +9,16 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 # pylint: disable=invalid-name
 # pylint: disable=no-member
+# pylint: disable=wrong-import-order
 import sys
 
+from keras.utils import to_categorical
 from sklearn import metrics, model_selection
 from sklearn.metrics import confusion_matrix
 
-from keras.utils import to_categorical
+from gg_learn.keras import Classifier
 import numpy as np
 import pandas as pd
-import sbclearn
-from sbclearn.keras.utils import Classifier
 
 
 def get_data(filename):
@@ -41,9 +41,9 @@ def classify(x_data, y_data):
     y_pred = classifier.predict(x_test)
     y_pred = np.array([[round(val) for val in pred] for pred in y_pred])
 
-    print confusion_matrix([np.argmax(y) for y in y_test],
-                           [np.argmax(y) for y in y_pred])
-    print metrics.accuracy_score(y_test, y_pred)
+    print(confusion_matrix([np.argmax(y) for y in y_test],
+                           [np.argmax(y) for y in y_pred]))
+    print(metrics.accuracy_score(y_test, y_pred))
 
 
 def regression(x_data, y_data):
@@ -57,9 +57,9 @@ def regression(x_data, y_data):
     y_pred = classifier.predict(x_test)
     y_pred = np.array([[round(val) for val in pred] for pred in y_pred])
 
-    print confusion_matrix([np.argmax(y) for y in y_test],
-                           [np.argmax(y) for y in y_pred])
-    print metrics.accuracy_score(y_test, y_pred)
+    print(confusion_matrix([np.argmax(y) for y in y_test],
+                           [np.argmax(y) for y in y_pred]))
+    print(metrics.accuracy_score(y_test, y_pred))
 
 
 def main(args):

@@ -11,10 +11,10 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 # pylint: disable=ungrouped-imports
 import sys
 
+import gg_learn
+from gg_learn.utils.validator import k_fold_cross_valid
 import numpy as np
 import pandas as pd
-import sbclearn
-from sbclearn.utils.validator import k_fold_cross_valid
 
 
 def get_data(filename):
@@ -51,7 +51,7 @@ def main(args):
     '''main method.'''
     x_data, y_data = get_data(args[0])
     results = k_fold_cross_valid((x_data, y_data))
-    sbclearn.plot(results, 'Prediction of limonene production from RBS seqs')
+    gg_learn.plot(results, 'Prediction of limonene production from RBS seqs')
 
 
 if __name__ == '__main__':

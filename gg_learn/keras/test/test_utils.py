@@ -9,20 +9,21 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 '''
 # pylint: disable=invalid-name
 # pylint: disable=no-member
+# pylint: disable=wrong-import-order
 import unittest
-
-from sklearn import metrics, model_selection
-from sklearn.datasets.samples_generator import make_blobs
-from sklearn.model_selection import KFold
-from sklearn.model_selection import cross_val_score
 
 from keras.layers import Dense
 from keras.models import Sequential
 from keras.utils import to_categorical
 from keras.wrappers.scikit_learn import KerasRegressor
+from sklearn import metrics, model_selection
+from sklearn.datasets.samples_generator import make_blobs
+from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score
+
+from gg_learn.keras import Classifier
 import numpy as np
 import pandas as pd
-from sbclearn.keras.utils import Classifier
 
 
 # from sklearn.metrics import confusion_matrix
@@ -72,7 +73,7 @@ class TestRegressor(unittest.TestCase):
 
         kfold = KFold(n_splits=5)
         results = cross_val_score(regressor, x_data, y_data, cv=kfold)
-        print 'Results: %.2f (%.2f) MSE' % (results.mean(), results.std())
+        print('Results: %.2f (%.2f) MSE' % (results.mean(), results.std()))
 
         self.assertTrue(results.mean() > 40)
 

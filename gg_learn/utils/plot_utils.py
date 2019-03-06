@@ -7,6 +7,8 @@ To view a copy of this license, visit <http://opensource.org/licenses/MIT/>.
 
 @author:  neilswainston
 '''
+# pylint: disable=invalid-name
+# pylint: disable=wrong-import-order
 import math
 
 from sklearn.linear_model import LinearRegression
