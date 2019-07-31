@@ -27,14 +27,11 @@ def fasta_to_df(filename):
 def get_onehot_seq(seqs):
     '''Encode an amino acid sequence as a tensor by concatenating one-hot
     encoding up to desired depth.'''
-    # Pad sequences at beginning to ensure consistent length:
-    max_seq_len = max([len(seq) for seq in seqs])
-    X = [seq.rjust(max_seq_len) for seq in seqs]
 
     # Encode 20 amino acids plus a default for non-amino acid:
     encoder = OneHotEncoder()
     encoder.fit([[idx] for idx in _aa_index(aa1 + ' ')])
-    return encoder.fit_transform(X).toarray()
+    return encoder.fit_transform(_pad(seqs)).toarray()
 
 
 def get_ordinal_seq(seqs):
@@ -48,9 +45,7 @@ def get_ordinal_seq_padded(seqs):
     encoding up to desired depth.'''
     # Left pad seqs with spaces to ensure consistent length,
     # and return as indexes:
-    max_seq_len = max([len(seq) for seq in seqs])
-    seqs = [seq.rjust(max_seq_len) for seq in seqs]
-    return get_ordinal_seq(seqs)
+    return get_ordinal_seq(_pad(seqs))
 
 
 def get_tensor_chem(mols, fingerprint_size, depth):
@@ -82,6 +77,12 @@ def get_tensor_reac(reacs, fingerprint_size, depth, token_size=1, min_path=1,
     return X
 
 
+def _pad(seqs):
+    '''Pad sequences at beginning to ensure consistent length.'''
+    max_seq_len = max([len(seq) for seq in seqs])
+    return [seq.rjust(max_seq_len) for seq in seqs]
+
+
 def _aa_index(seq):
     '''Convert amino acid to numerical index.'''
     return [d1_to_index.get(aa, -1) + 1 for aa in seq]
@@ -96,9 +97,8 @@ def _chem_fp(mol, fingerprint_size, min_path=1, max_path=5):
 
 
 def _reac_fp(reac, min_path=1, max_path=5):
-    ''' Reaction fingerprint '''
+    '''Get reaction fingerprint.'''
     left, right = reac
-
     left = [_chem_fp(m, min_path, max_path) for m in left]
     right = [_chem_fp(m, min_path, max_path) for m in right]
 
