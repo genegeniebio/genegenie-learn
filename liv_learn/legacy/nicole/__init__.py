@@ -9,10 +9,10 @@ All rights reserved.
 # pylint: disable=wrong-import-order
 import os
 
+from liv_learn.legacy.nicole import xl_converter
 from liv_learn.utils import aligner
 import numpy as np
 import pandas as pd
-from synbiochem.utils import xl_converter
 
 
 def get_aligned_data(df):
